@@ -218,3 +218,18 @@ auto r1 = 4 * (_*2) * (_+2); // (4 * 2 + 2) = 10
 // output: 12,10
 std::cout << r0, << "," << r1 << std::endl;
 ```
+
+### Point-free style for Haskell maniacs
+
+```cpp
+using namespace kari::underscore;
+
+// (. (+2)) (*2) $ 10 == 24 // haskell analog
+auto r0 = (_*(_+2))(_*2) * 10;
+
+// ((+2) .) (*2) $ 10 == 22 // haskell analog
+auto r1 = ((_+2)*_)(_*2) * 10;
+
+// output: 24,22
+std::cout << r0, << "," << r1 << std::endl;
+```
