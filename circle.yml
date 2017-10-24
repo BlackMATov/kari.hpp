@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: cmake --version && gcc --version
-      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=DEBUG && cmake --build .
+      - run: mkdir build && cd build && cmake ../tests -DCMAKE_BUILD_TYPE=DEBUG && cmake --build .
       - run: ./build/kari
   gcc_build_release:
     docker:
@@ -14,7 +14,7 @@ jobs:
     steps:
       - checkout
       - run: cmake --version && gcc --version
-      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
+      - run: mkdir build && cd build && cmake ../tests -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
       - run: ./build/kari
   clang_build_debug:
     docker:
@@ -22,7 +22,7 @@ jobs:
     steps:
       - checkout
       - run: cmake --version && clang --version
-      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=DEBUG && cmake --build .
+      - run: mkdir build && cd build && cmake ../tests -DCMAKE_BUILD_TYPE=DEBUG && cmake --build .
       - run: ./build/kari
   clang_build_release:
     docker:
@@ -30,7 +30,7 @@ jobs:
     steps:
       - checkout
       - run: cmake --version && clang --version
-      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
+      - run: mkdir build && cd build && cmake ../tests -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
       - run: ./build/kari
 workflows:
   version: 2

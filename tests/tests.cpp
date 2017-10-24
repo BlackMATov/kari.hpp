@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "kari.hpp"
+#include "../kari.hpp"
 
 #include <cstdio>
 #include <cstring>

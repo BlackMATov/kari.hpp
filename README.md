@@ -15,8 +15,8 @@
 [badge.wandbox]: https://img.shields.io/badge/try%20it-on%20wandbox-5cb85c.svg
 
 [circleci]: https://circleci.com/gh/BlackMATov/kari.hpp
-[appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp-arict
-[license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE
+[appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
+[license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
 [wandbox]: https://wandbox.org/permlink/l2PeuYUx2K2Yqbwj
 
@@ -88,19 +88,19 @@ std::cout << c0 << "," << c1 << "," << c2 << std::endl;
 namespace kari {
   template < typename F, typename... Args >
   constexpr decltype(auto) curry(F&& f, Args&&... args) const;
-  
+
   template < typename F, typename... Args >
   constexpr decltype(auto) curryV(F&& f, Args&&... args) const;
-  
+
   template < std::size_t N, typename F, typename... Args >
   constexpr decltype(auto) curryN(F&& f, Args&&... args) const;
-  
+
   template < typename F >
   struct is_curried;
-  
+
   template < typename F >
   constexpr bool is_curried_v = is_curried<F>::value;
-  
+
   template < std::size_t N, typename F, typename... Args >
   struct curry_t {
     template < typename... As >
