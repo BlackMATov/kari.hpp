@@ -10,7 +10,7 @@ platform:
   - x64
 build_script:
   - mkdir build && cd build
-  - cmake .. -A%PLATFORM%
+  - cmake ../tests -A%PLATFORM%
   - cmake --build . --config %CONFIGURATION%
   - ..\build\%CONFIGURATION%\kari.exe
 test: off
