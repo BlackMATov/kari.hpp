@@ -111,13 +111,13 @@ namespace kari {
 
 ---
 
-## `kari::curry(F&& f, Args&&... args)`
+### `kari::curry(F&& f, Args&&... args)`
 
 Returns a curried function **`f`** or copy the function result with **`args`** arguments.
 
 ---
 
-## `kari::curryV(F&& f, Args&&... args)`
+### `kari::curryV(F&& f, Args&&... args)`
 
 Allows carrying variadic functions.
 
@@ -132,7 +132,7 @@ c2(); // output: 37 + 5 = 42
 
 ---
 
-## `kari::curryN(F&& f, Args&&... args)`
+### `kari::curryN(F&& f, Args&&... args)`
 
 Allows carrying variadic functions for **`N`** arguments.
 
@@ -145,7 +145,7 @@ std::cout << buffer << std::endl;  // output: 37 + 5 = 42
 
 ---
 
-## `kari::is_curried<F>, kari::is_curried_v<F>`
+### `kari::is_curried<F>, kari::is_curried_v<F>`
 
 Checks whether F is a curried function type.
 
@@ -170,7 +170,7 @@ std::cout
 
 ---
 
-## `kari::curry_t::operator()(As&&... as)`
+### `kari::curry_t::operator()(As&&... as)`
 
 Calling operator of curried function for partial application or full application. Returns a new curried function with added new arguments or copy of the function result.
 
@@ -188,3 +188,33 @@ std::cout << rr << std::endl;
 ```
 
 ---
+
+## Free syntactic sugar
+
+### Section of operators
+
+```cpp
+using namespace kari::underscore;
+std::vector<int> v{1,2,3,4};
+
+// result: 10
+std::accumulate(v.begin(), v.end(), 0, _+_);
+
+// v = 2, 3, 6, 8
+std::transform(v.begin(), v.end(), v.begin(), _*2);
+
+// v = -2,-3,-6,-8
+std::transform(v.begin(), v.end(), v.begin(), -_);
+```
+
+### Function composition
+
+```cpp
+using namespace kari::underscore;
+
+auto r0 = (_*2) * (_+2) * 4; // (4 + 2) * 2 = 12
+auto r1 = 4 * (_*2) * (_+2); // (4 * 2 + 2) = 10
+
+// output: 12,10
+std::cout << r0, << "," << r1 << std::endl;
+```
