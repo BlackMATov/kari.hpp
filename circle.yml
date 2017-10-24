@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  gcc_build_debug:
+    docker:
+      - image: rikorose/gcc-cmake
+    steps:
+      - checkout
+      - run: cmake --version && gcc --version
+      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=DEBUG && cmake --build .
+      - run: ./build/kari
+  gcc_build_release:
+    docker:
+      - image: rikorose/gcc-cmake
+    steps:
+      - checkout
+      - run: cmake --version && gcc --version
+      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
+      - run: ./build/kari
+  clang_build_debug:
+    docker:
+      - image: mickare/cmake-clang
+    steps:
+      - checkout
+      - run: cmake --version && clang --version
+      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=DEBUG && cmake --build .
+      - run: ./build/kari
+  clang_build_release:
+    docker:
+      - image: mickare/cmake-clang
+    steps:
+      - checkout
+      - run: cmake --version && clang --version
+      - run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && cmake --build .
+      - run: ./build/kari
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - gcc_build_debug
+      - clang_build_debug
+      - gcc_build_release
+      - clang_build_release
