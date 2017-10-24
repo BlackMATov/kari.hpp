@@ -15,7 +15,7 @@
 [badge.wandbox]: https://img.shields.io/badge/try%20it-on%20wandbox-5cb85c.svg
 
 [circleci]: https://circleci.com/gh/BlackMATov/kari.hpp
-[appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp-arict
+[appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
 [wandbox]: https://wandbox.org/permlink/l2PeuYUx2K2Yqbwj
