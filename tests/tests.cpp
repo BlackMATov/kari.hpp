@@ -585,6 +585,12 @@ TEST_CASE("kari_helpers") {
         REQUIRE(fflip(curry(std::minus<>()))(10, 20) == 10);
         REQUIRE(fflip(minus3_gl)(10,20,50) == -40);
     }
+    SECTION("fpipe") {
+        using namespace kari::underscore;
+        REQUIRE(fpipe(_+2, _*2, 4) == 12);
+        REQUIRE(((_+2) | (_*2) | 4) == 12);
+        REQUIRE((4 | (_+2) | (_*2)) == 12);
+    }
     SECTION("fcompose") {
         using namespace kari::underscore;
         REQUIRE(fcompose(_+2, _*2, 4) == 10);

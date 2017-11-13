@@ -38,7 +38,7 @@ namespace kari
                 return apply_impl(
                     std::forward<F>(f),
                     std::forward<Tuple>(args),
-                    std::make_index_sequence<std::tuple_size<Tuple>::value>());
+                    std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
             }
 
             //
@@ -375,6 +375,22 @@ namespace kari
     constexpr auto fflip = curry(fflip_t{});
 
     //
+    // fpipe
+    //
+
+    struct fpipe_t {
+        template < typename G, typename F, typename A >
+        constexpr decltype(auto) operator()(G&& g, F&& f, A&& a) const {
+            return curry(
+                std::forward<F>(f),
+                curry(
+                    std::forward<G>(g),
+                    std::forward<A>(a)));
+        }
+    };
+    constexpr auto fpipe = curry(fpipe_t{});
+
+    //
     // fcompose
     //
 
@@ -389,6 +405,42 @@ namespace kari
         }
     };
     constexpr auto fcompose = curry(fcompose_t{});
+
+    //
+    // fpipe operators
+    //
+
+    template
+    <
+        typename G, typename F,
+        typename std::enable_if<is_curried_v<G>, int>::type = 0,
+        typename std::enable_if<is_curried_v<F>, int>::type = 0
+    >
+    constexpr decltype(auto) operator|(G&& g, F&& f) {
+        return fpipe(
+            std::forward<G>(g),
+            std::forward<F>(f));
+    }
+
+    template
+    <
+        typename F, typename A,
+        typename std::enable_if< is_curried_v<F>, int>::type = 0,
+        typename std::enable_if<!is_curried_v<A>, int>::type = 0
+    >
+    constexpr decltype(auto) operator|(F&& f, A&& a) {
+        return std::forward<F>(f)(std::forward<A>(a));
+    }
+
+    template
+    <
+        typename A, typename F,
+        typename std::enable_if<!is_curried_v<A>, int>::type = 0,
+        typename std::enable_if< is_curried_v<F>, int>::type = 0
+    >
+    constexpr decltype(auto) operator|(A&& a, F&& f) {
+        return std::forward<F>(f)(std::forward<A>(a));
+    }
 
     //
     // fcompose operators
