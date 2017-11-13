@@ -18,7 +18,7 @@
 [appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
-[wandbox]: https://wandbox.org/permlink/l2PeuYUx2K2Yqbwj
+[wandbox]: https://wandbox.org/permlink/eKfLeyjXvOLfzQvG
 
 [kari]: https://github.com/BlackMATov/kari.hpp
 
@@ -208,6 +208,20 @@ std::transform(v.begin(), v.end(), v.begin(), -_);
 ```
 
 ### Function composition
+
+#### Pipe operator
+
+```cpp
+using namespace kari::underscore;
+
+auto r0 = (_*2) | (_+2) | 4; // (4 * 2) + 2 = 10
+auto r1 = 4 | (_*2) | (_+2); // (4 * 2 + 2) = 10
+
+// output: 10,10
+std::cout << r0, << "," << r1 << std::endl;
+```
+
+#### Compose operator
 
 ```cpp
 using namespace kari::underscore;

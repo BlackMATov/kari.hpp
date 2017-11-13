@@ -207,17 +207,32 @@ TEST_CASE("kari_feature") {
         REQUIRE((_ / 2)(84) == 42);
         REQUIRE((_ % 100)(142) == 42);
 
+        REQUIRE((_ == 42)(42));
+        REQUIRE((_ != 42)(40));
+        REQUIRE_FALSE((_ == 42)(40));
+        REQUIRE_FALSE((_ != 42)(42));
+
         REQUIRE((40 + _)(2) == 42);
         REQUIRE((44 - _)(2) == 42);
         REQUIRE((21 * _)(2) == 42);
         REQUIRE((84 / _)(2) == 42);
         REQUIRE((142 % _)(100) == 42);
 
+        REQUIRE((42 == _)(42));
+        REQUIRE((42 != _)(40));
+        REQUIRE_FALSE((42 == _)(40));
+        REQUIRE_FALSE((42 != _)(42));
+
         REQUIRE((_ + _)(40,2) == 42);
         REQUIRE((_ - _)(44,2) == 42);
         REQUIRE((_ * _)(21,2) == 42);
         REQUIRE((_ / _)(84,2) == 42);
         REQUIRE((_ % _)(142,100) == 42);
+
+        REQUIRE((_ == _)(42,42));
+        REQUIRE((_ != _)(42,40));
+        REQUIRE_FALSE((_ == _)(42,40));
+        REQUIRE_FALSE((_ != _)(42,42));
     }
     SECTION("ref_functor") {
         REQUIRE(curry(minus3_gf())(1,2,3) == -4);
@@ -584,6 +599,12 @@ TEST_CASE("kari_helpers") {
     SECTION("fflip") {
         REQUIRE(fflip(curry(std::minus<>()))(10, 20) == 10);
         REQUIRE(fflip(minus3_gl)(10,20,50) == -40);
+    }
+    SECTION("fpipe") {
+        using namespace kari::underscore;
+        REQUIRE(fpipe(_+2, _*2, 4) == 12);
+        REQUIRE(((_+2) | (_*2) | 4) == 12);
+        REQUIRE((4 | (_+2) | (_*2)) == 12);
     }
     SECTION("fcompose") {
         using namespace kari::underscore;
