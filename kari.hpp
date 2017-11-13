@@ -504,6 +504,8 @@ namespace kari
         constexpr auto operator >  (us_t, us_t) { return curry(std::greater<>()); }
         constexpr auto operator <= (us_t, us_t) { return curry(std::less_equal<>()); }
         constexpr auto operator >= (us_t, us_t) { return curry(std::greater_equal<>()); }
+        constexpr auto operator == (us_t, us_t) { return curry(std::equal_to<>()); }
+        constexpr auto operator != (us_t, us_t) { return curry(std::not_equal_to<>()); }
 
         constexpr auto operator |  (us_t, us_t) { return curry(std::bit_or<>()); }
         constexpr auto operator &  (us_t, us_t) { return curry(std::bit_and<>()); }
@@ -524,6 +526,8 @@ namespace kari
         template < typename A > constexpr auto operator >  (A&& a, us_t) { return (_ >  _)(std::forward<A>(a)); }
         template < typename A > constexpr auto operator <= (A&& a, us_t) { return (_ <= _)(std::forward<A>(a)); }
         template < typename A > constexpr auto operator >= (A&& a, us_t) { return (_ >= _)(std::forward<A>(a)); }
+        template < typename A > constexpr auto operator == (A&& a, us_t) { return (_ == _)(std::forward<A>(a)); }
+        template < typename A > constexpr auto operator != (A&& a, us_t) { return (_ != _)(std::forward<A>(a)); }
 
         template < typename A > constexpr auto operator |  (A&& a, us_t) { return (_ |  _)(std::forward<A>(a)); }
         template < typename A > constexpr auto operator &  (A&& a, us_t) { return (_ &  _)(std::forward<A>(a)); }
@@ -544,6 +548,8 @@ namespace kari
         template < typename A > constexpr auto operator >  (us_t, A&& a) { return fflip(_ >  _)(std::forward<A>(a)); }
         template < typename A > constexpr auto operator <= (us_t, A&& a) { return fflip(_ <= _)(std::forward<A>(a)); }
         template < typename A > constexpr auto operator >= (us_t, A&& a) { return fflip(_ >= _)(std::forward<A>(a)); }
+        template < typename A > constexpr auto operator == (us_t, A&& a) { return fflip(_ == _)(std::forward<A>(a)); }
+        template < typename A > constexpr auto operator != (us_t, A&& a) { return fflip(_ != _)(std::forward<A>(a)); }
 
         template < typename A > constexpr auto operator |  (us_t, A&& a) { return fflip(_ |  _)(std::forward<A>(a)); }
         template < typename A > constexpr auto operator &  (us_t, A&& a) { return fflip(_ &  _)(std::forward<A>(a)); }
