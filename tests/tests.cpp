@@ -586,6 +586,44 @@ TEST_CASE("kari") {
             REQUIRE(c1(40,2) == 42);
         }
     }
+    SECTION("member_functions") {
+        {
+            auto c0 = curry(&box::addV);
+            auto c1 = curry(&box::v);
+            REQUIRE(c0(box(10), 2) == 12);
+            REQUIRE(c1(box(12)) == 12);
+        }
+        {
+            auto c0 = curry(&box::addV);
+            auto c1 = curry(&box::v);
+
+            auto b1 = box(10);
+            const auto b2 = box(10);
+
+            REQUIRE(c0(std::ref(b1), 2) == 12);
+            REQUIRE(c1(std::ref(b2)) == 10);
+
+            REQUIRE(c0(b1, 2) == 14);
+            REQUIRE(c1(b2) == 10);
+
+            REQUIRE(c0(&b1, 2) == 14);
+            REQUIRE(c1(&b2) == 10);
+        }
+    }
+    SECTION("member_objects") {
+        struct box2 : box {
+            box2(int v) : box(v), ov(v) {}
+            int ov;
+        };
+        auto c = curry(&box2::ov);
+        auto b1 = box2(10);
+        const auto b2 = box2(10);
+        REQUIRE(c(box2(10)) == 10);
+        REQUIRE(c(b1) == 10);
+        REQUIRE(c(b2) == 10);
+        REQUIRE(c(std::ref(b1)) == 10);
+        REQUIRE(c(std::ref(b2)) == 10);
+    }
 }
 
 TEST_CASE("kari_details") {
