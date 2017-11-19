@@ -25,47 +25,6 @@ namespace kari
             using void_t = typename make_void<Ts...>::type;
 
             //
-            // apply
-            //
-
-            template < typename F, typename Tuple, std::size_t... I >
-            constexpr decltype(auto) apply_impl(F&& f, Tuple&& args, std::index_sequence<I...>) {
-                return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(args))...);
-            }
-
-            template < typename F, typename Tuple >
-            constexpr decltype(auto) apply(F&& f, Tuple&& args) {
-                return apply_impl(
-                    std::forward<F>(f),
-                    std::forward<Tuple>(args),
-                    std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
-            }
-
-            //
-            // is_invocable, is_invocable_v
-            //
-
-            namespace detail
-            {
-                template < typename F, typename = void >
-                struct is_invocable_impl
-                : std::false_type {};
-
-                template < typename F, typename... Args >
-                struct is_invocable_impl<
-                    F(Args...),
-                    void_t<decltype(std::declval<F>()(std::declval<Args>()...))>
-                > : std::true_type {};
-            }
-
-            template < typename F, typename... Args >
-            struct is_invocable
-            : detail::is_invocable_impl<F(Args...)> {};
-
-            template < typename F, typename... Args >
-            constexpr bool is_invocable_v = is_invocable<F, Args...>::value;
-
-            //
             // conjunction, conjunction_v
             //
 
@@ -120,6 +79,171 @@ namespace kari
 
             template < typename B >
             constexpr bool negation_v = negation<B>::value;
+
+            //
+            // is_reference_wrapper, is_reference_wrapper_v
+            //
+
+            namespace detail
+            {
+                template < typename T >
+                struct is_reference_wrapper_impl
+                : public std::false_type {};
+
+                template < typename T >
+                struct is_reference_wrapper_impl<std::reference_wrapper<T>>
+                : public std::true_type {};
+            }
+
+            template < typename T >
+            struct is_reference_wrapper
+            : public detail::is_reference_wrapper_impl<std::remove_cv_t<T>> {};
+
+            template < typename T >
+            constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
+
+            //
+            // invoke
+            //
+
+            namespace detail
+            {
+                //
+                // invoke_member_object_impl
+                //
+
+                template
+                <
+                    typename Base, typename F, typename Derived,
+                    typename std::enable_if<std::is_base_of<Base, std::decay_t<Derived>>::value, int>::type = 0
+                >
+                constexpr decltype(auto) invoke_member_object_impl(F Base::* f, Derived&& ref) {
+                    return std::forward<Derived>(ref).*f;
+                }
+
+                template
+                <
+                    typename Base, typename F, typename RefWrap,
+                    typename std::enable_if<is_reference_wrapper<std::decay_t<RefWrap>>::value, int>::type = 0
+                >
+                constexpr decltype(auto) invoke_member_object_impl(F Base::* f, RefWrap&& ref) {
+                    return ref.get().*f;
+                }
+
+                template
+                <
+                    typename Base, typename F, typename Pointer,
+                    typename std::enable_if<conjunction_v<
+                        negation<std::is_base_of<Base, std::decay_t<Pointer>>>,
+                        negation<is_reference_wrapper<std::decay_t<Pointer>>>
+                    >, int>::type = 0
+                >
+                constexpr decltype(auto) invoke_member_object_impl(F Base::* f, Pointer&& ptr) {
+                    return (*std::forward<Pointer>(ptr)).*f;
+                }
+
+                //
+                // invoke_member_function_impl
+                //
+
+                template
+                <
+                    typename Base, typename F, typename Derived, typename... Args,
+                    typename std::enable_if<std::is_base_of<Base, std::decay_t<Derived>>::value, int>::type = 0
+                >
+                constexpr decltype(auto) invoke_member_function_impl(F Base::* f, Derived&& ref, Args&&... args) {
+                    return (std::forward<Derived>(ref).*f)(std::forward<Args>(args)...);
+                }
+
+                template
+                <
+                    typename Base, typename F, typename RefWrap, typename... Args,
+                    typename std::enable_if<is_reference_wrapper<std::decay_t<RefWrap>>::value, int>::type = 0
+                >
+                constexpr decltype(auto) invoke_member_function_impl(F Base::* f, RefWrap&& ref, Args&&... args) {
+                    return (ref.get().*f)(std::forward<Args>(args)...);
+                }
+
+                template
+                <
+                    typename Base, typename F, typename Pointer, typename... Args,
+                    typename std::enable_if<conjunction_v<
+                        negation<std::is_base_of<Base, std::decay_t<Pointer>>>,
+                        negation<is_reference_wrapper<std::decay_t<Pointer>>>
+                    >, int>::type = 0
+                >
+                constexpr decltype(auto) invoke_member_function_impl(F Base::* f, Pointer&& ptr, Args&&... args) {
+                    return ((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...);
+                }
+            }
+
+            template
+            <
+                typename F, typename... Args,
+                typename std::enable_if<!std::is_member_pointer<std::decay_t<F>>::value, int>::type = 0
+            >
+            constexpr decltype(auto) invoke(F&& f, Args&&... args) {
+                return std::forward<F>(f)(std::forward<Args>(args)...);
+            }
+
+            template
+            <
+                typename F, typename T,
+                typename std::enable_if<std::is_member_object_pointer<std::decay_t<F>>::value, int>::type = 0
+            >
+            constexpr decltype(auto) invoke(F&& f, T&& t) {
+                return detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t));
+            }
+
+            template
+            <
+                typename F, typename... Args,
+                typename std::enable_if<std::is_member_function_pointer<std::decay_t<F>>::value, int>::type = 0
+            >
+            constexpr decltype(auto) invoke(F&& f, Args&&... args) {
+                return detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...);
+            }
+
+            //
+            // apply
+            //
+
+            template < typename F, typename Tuple, std::size_t... I >
+            constexpr decltype(auto) apply_impl(F&& f, Tuple&& args, std::index_sequence<I...>) {
+                return std::forward<F>(f)(std::get<I>(std::forward<Tuple>(args))...);
+            }
+
+            template < typename F, typename Tuple >
+            constexpr decltype(auto) apply(F&& f, Tuple&& args) {
+                return apply_impl(
+                    std::forward<F>(f),
+                    std::forward<Tuple>(args),
+                    std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
+            }
+
+            //
+            // is_invocable, is_invocable_v
+            //
+
+            namespace detail
+            {
+                template < typename F, typename = void >
+                struct is_invocable_impl
+                : std::false_type {};
+
+                template < typename F, typename... Args >
+                struct is_invocable_impl<
+                    F(Args...),
+                    void_t<decltype(std::declval<F>()(std::declval<Args>()...))>
+                > : std::true_type {};
+            }
+
+            template < typename F, typename... Args >
+            struct is_invocable
+            : detail::is_invocable_impl<F(Args...)> {};
+
+            template < typename F, typename... Args >
+            constexpr bool is_invocable_v = is_invocable<F, Args...>::value;
         }
     }
 }

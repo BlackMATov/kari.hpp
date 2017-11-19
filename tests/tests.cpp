@@ -588,6 +588,89 @@ TEST_CASE("kari") {
     }
 }
 
+TEST_CASE("kari_details") {
+    SECTION("invoke") {
+        using kari::detail::std_ext::invoke;
+        REQUIRE(invoke(std::minus<>(), 44, 2) == 42);
+        REQUIRE(invoke(&box::addV, box(10), 2) == 12);
+        {
+            auto b1 = box(10);
+            const auto b2 = box(10);
+            REQUIRE(invoke(&box::addV, b1, 2) == 12);
+            REQUIRE(invoke(&box::v, b2) == 10);
+            REQUIRE(invoke(&box::addV, &b1, 2) == 14);
+            REQUIRE(invoke(&box::v, &b2) == 10);
+        }
+        {
+            auto b1 = box(10);
+            const auto b2 = box(10);
+            REQUIRE(invoke(&box::addV, std::ref(b1), 2) == 12);
+            REQUIRE(invoke(&box::v, std::ref(b2)) == 10);
+        }
+        {
+            struct box2 : box {
+                box2(int v) : box(v) {}
+            };
+            auto b1 = box2(10);
+            const auto b2 = box2(10);
+            REQUIRE(invoke(&box::addV, b1, 2) == 12);
+            REQUIRE(invoke(&box::v, b2) == 10);
+            REQUIRE(invoke(&box::addV, &b1, 2) == 14);
+            REQUIRE(invoke(&box::v, &b2) == 10);
+
+            REQUIRE(invoke(&box2::addV, b1, 2) == 16);
+            REQUIRE(invoke(&box2::v, b2) == 10);
+            REQUIRE(invoke(&box2::addV, &b1, 2) == 18);
+            REQUIRE(invoke(&box2::v, &b2) == 10);
+        }
+        {
+            struct box2 : box {
+                box2(int v) : box(v) {}
+            };
+            auto b1 = box2(10);
+            const auto b2 = box2(10);
+            REQUIRE(invoke(&box::addV, std::ref(b1), 2) == 12);
+            REQUIRE(invoke(&box::v, std::ref(b2)) == 10);
+
+            REQUIRE(invoke(&box2::addV, std::ref(b1), 2) == 14);
+            REQUIRE(invoke(&box2::v, std::ref(b2)) == 10);
+        }
+        {
+            struct box2 : box {
+                box2(int v) : box(v), ov(v) {}
+                int ov;
+            };
+            auto b1 = box2(10);
+            const auto b2 = box2(10);
+            REQUIRE(invoke(&box2::ov, box2(10)) == 10);
+            REQUIRE(invoke(&box2::ov, b1) == 10);
+            REQUIRE(invoke(&box2::ov, b2) == 10);
+            REQUIRE(invoke(&box2::ov, &b1) == 10);
+            REQUIRE(invoke(&box2::ov, &b2) == 10);
+            REQUIRE(invoke(&box2::ov, std::ref(b1)) == 10);
+            REQUIRE(invoke(&box2::ov, std::ref(b2)) == 10);
+        }
+        {
+            struct box2 : box {
+                box2(int v) : box(v), ov(v) {}
+                int ov;
+            };
+            struct box3 : box2 {
+                box3(int v) : box2(v) {}
+            };
+            auto b1 = box3(10);
+            const auto b2 = box3(10);
+            REQUIRE(invoke(&box2::ov, box3(10)) == 10);
+            REQUIRE(invoke(&box2::ov, b1) == 10);
+            REQUIRE(invoke(&box2::ov, b2) == 10);
+            REQUIRE(invoke(&box2::ov, &b1) == 10);
+            REQUIRE(invoke(&box2::ov, &b2) == 10);
+            REQUIRE(invoke(&box2::ov, std::ref(b1)) == 10);
+            REQUIRE(invoke(&box2::ov, std::ref(b2)) == 10);
+        }
+    }
+}
+
 TEST_CASE("kari_helpers") {
     SECTION("fid") {
         REQUIRE(fid(box(10)).v() == 10);
