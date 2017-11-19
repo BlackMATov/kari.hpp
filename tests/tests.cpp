@@ -580,6 +580,11 @@ TEST_CASE("kari") {
             REQUIRE(c2(40,2) == 42);
             REQUIRE(c3(20,15,5,2) == 42);
         }
+        {
+            auto c0 = curry(plusV_gf());
+            auto c1 = curryN<2>(c0);
+            REQUIRE(c1(40,2) == 42);
+        }
     }
 }
 

@@ -240,7 +240,7 @@ namespace kari
 
     template < typename F >
     struct is_curried
-    : detail::is_curried_impl<std::remove_cv_t<std::remove_reference_t<F>>> {};
+    : detail::is_curried_impl<std::remove_cv_t<F>> {};
 
     template < typename F >
     constexpr bool is_curried_v = is_curried<F>::value;
@@ -252,7 +252,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<is_curried_v<F>, int>::type = 0
+        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) curry(F&& f) {
         return std::forward<F>(f);
@@ -261,7 +261,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<!is_curried_v<F>, int>::type = 0
+        typename std::enable_if<!is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) curry(F&& f) {
         return detail::make_curry<0>(std::forward<F>(f));
@@ -279,7 +279,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<is_curried_v<F>, int>::type = 0
+        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) curryV(F&& f) {
         constexpr auto n = std::numeric_limits<std::size_t>::max();
@@ -289,7 +289,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<!is_curried_v<F>, int>::type = 0
+        typename std::enable_if<!is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) curryV(F&& f) {
         constexpr auto n = std::numeric_limits<std::size_t>::max();
@@ -308,7 +308,7 @@ namespace kari
     template
     <
         std::size_t N, typename F,
-        typename std::enable_if<is_curried_v<F>, int>::type = 0
+        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) curryN(F&& f) {
         return std::forward<F>(f).template recurry<N>();
@@ -317,7 +317,7 @@ namespace kari
     template
     <
         std::size_t N, typename F,
-        typename std::enable_if<!is_curried_v<F>, int>::type = 0
+        typename std::enable_if<!is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) curryN(F&& f) {
         return detail::make_curry<N>(std::forward<F>(f));
@@ -413,8 +413,8 @@ namespace kari
     template
     <
         typename G, typename F,
-        typename std::enable_if<is_curried_v<G>, int>::type = 0,
-        typename std::enable_if<is_curried_v<F>, int>::type = 0
+        typename std::enable_if<is_curried_v<std::decay_t<G>>, int>::type = 0,
+        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) operator|(G&& g, F&& f) {
         return fpipe(
@@ -425,8 +425,8 @@ namespace kari
     template
     <
         typename F, typename A,
-        typename std::enable_if< is_curried_v<F>, int>::type = 0,
-        typename std::enable_if<!is_curried_v<A>, int>::type = 0
+        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0,
+        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0
     >
     constexpr decltype(auto) operator|(F&& f, A&& a) {
         return std::forward<F>(f)(std::forward<A>(a));
@@ -435,8 +435,8 @@ namespace kari
     template
     <
         typename A, typename F,
-        typename std::enable_if<!is_curried_v<A>, int>::type = 0,
-        typename std::enable_if< is_curried_v<F>, int>::type = 0
+        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0,
+        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) operator|(A&& a, F&& f) {
         return std::forward<F>(f)(std::forward<A>(a));
@@ -449,8 +449,8 @@ namespace kari
     template
     <
         typename G, typename F,
-        typename std::enable_if<is_curried_v<G>, int>::type = 0,
-        typename std::enable_if<is_curried_v<F>, int>::type = 0
+        typename std::enable_if<is_curried_v<std::decay_t<G>>, int>::type = 0,
+        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) operator*(G&& g, F&& f) {
         return fcompose(
@@ -461,8 +461,8 @@ namespace kari
     template
     <
         typename F, typename A,
-        typename std::enable_if< is_curried_v<F>, int>::type = 0,
-        typename std::enable_if<!is_curried_v<A>, int>::type = 0
+        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0,
+        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0
     >
     constexpr decltype(auto) operator*(F&& f, A&& a) {
         return std::forward<F>(f)(std::forward<A>(a));
@@ -471,8 +471,8 @@ namespace kari
     template
     <
         typename A, typename F,
-        typename std::enable_if<!is_curried_v<A>, int>::type = 0,
-        typename std::enable_if< is_curried_v<F>, int>::type = 0
+        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0,
+        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0
     >
     constexpr decltype(auto) operator*(A&& a, F&& f) {
         return std::forward<F>(f)(std::forward<A>(a));
