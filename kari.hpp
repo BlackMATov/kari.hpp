@@ -420,10 +420,10 @@ namespace kari
     KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
         detail::make_curry<0>(std::forward<F>(f)))
 
-    template < typename F, typename... Args >
-    constexpr auto curry(F&& f, Args&&... args)
+    template < typename F, typename A, typename... As >
+    constexpr auto curry(F&& f, A&& a, As&&... as)
     KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
-        kari::curry(std::forward<F>(f))(std::forward<Args>(args)...))
+        curry(std::forward<F>(f))(std::forward<A>(a), std::forward<As>(as)...))
 
     //
     // curryV
@@ -449,10 +449,10 @@ namespace kari
     KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
         detail::make_curry<MaxN>(std::forward<F>(f)))
 
-    template < typename F, typename... Args >
-    constexpr auto curryV(F&& f, Args&&... args)
+    template < typename F, typename A, typename... As >
+    constexpr auto curryV(F&& f, A&& a, As&&... as)
     KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
-        kari::curryV(std::forward<F>(f))(std::forward<Args>(args)...))
+        curryV(std::forward<F>(f))(std::forward<A>(a), std::forward<As>(as)...))
 
     //
     // curryN
@@ -478,13 +478,14 @@ namespace kari
 
     template
     <
-        std::size_t N, typename F, typename... Args,
+        std::size_t N, typename F, typename A, typename... As,
+        std::size_t Args = sizeof...(As) + 1,
         std::size_t MaxN = std::numeric_limits<std::size_t>::max(),
-        typename std::enable_if_t<MaxN - sizeof...(Args) >= N, int> = 0
+        typename std::enable_if_t<(MaxN - Args >= N), int> = 0
     >
-    constexpr auto curryN(F&& f, Args&&... args)
+    constexpr auto curryN(F&& f, A&& a, As&&... as)
     KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
-        kari::curryN<N + sizeof...(Args)>(std::forward<F>(f))(std::forward<Args>(args)...))
+        curryN<N + Args>(std::forward<F>(f))(std::forward<A>(a), std::forward<As>(as)...))
 }
 
 namespace kari
