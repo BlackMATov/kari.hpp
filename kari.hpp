@@ -25,62 +25,6 @@ namespace kari
             using void_t = typename make_void<Ts...>::type;
 
             //
-            // conjunction, conjunction_v
-            //
-
-            template < typename... >
-            struct conjunction
-            : std::true_type {};
-
-            template < typename B >
-            struct conjunction<B>
-            : B {};
-
-            template < typename B, typename... Bs>
-            struct conjunction<B, Bs...>
-            : std::conditional_t<bool(B::value), conjunction<Bs...>, B> {};
-
-            template < typename... Bs >
-            constexpr bool conjunction_v = conjunction<Bs...>::value;
-
-            //
-            // disjunction, disjunction_v
-            //
-
-            template < typename... >
-            struct disjunction
-            : std::false_type {};
-
-            template < typename B >
-            struct disjunction<B>
-            : B {};
-
-            template < typename B, typename... Bs>
-            struct disjunction<B, Bs...>
-            : std::conditional_t<bool(B::value), B, disjunction<Bs...>> {};
-
-            template < typename... Bs >
-            constexpr bool disjunction_v = disjunction<Bs...>::value;
-
-            //
-            // bool_constant
-            //
-
-            template < bool B >
-            using bool_constant = std::integral_constant<bool, B>;
-
-            //
-            // negation, negation_v
-            //
-
-            template < typename B >
-            struct negation
-            : bool_constant<!bool(B::value)> {};
-
-            template < typename B >
-            constexpr bool negation_v = negation<B>::value;
-
-            //
             // is_reference_wrapper, is_reference_wrapper_v
             //
 
@@ -115,7 +59,7 @@ namespace kari
                 template
                 <
                     typename Base, typename F, typename Derived,
-                    typename std::enable_if<std::is_base_of<Base, std::decay_t<Derived>>::value, int>::type = 0
+                    typename std::enable_if_t<std::is_base_of<Base, std::decay_t<Derived>>::value, int> = 0
                 >
                 constexpr auto invoke_member_object_impl(F Base::* f, Derived&& ref)
                     -> decltype (std::forward<Derived>(ref).*f)
@@ -126,7 +70,7 @@ namespace kari
                 template
                 <
                     typename Base, typename F, typename RefWrap,
-                    typename std::enable_if<is_reference_wrapper<std::decay_t<RefWrap>>::value, int>::type = 0
+                    typename std::enable_if_t<is_reference_wrapper<std::decay_t<RefWrap>>::value, int> = 0
                 >
                 constexpr auto invoke_member_object_impl(F Base::* f, RefWrap&& ref)
                     -> decltype (ref.get().*f)
@@ -137,10 +81,10 @@ namespace kari
                 template
                 <
                     typename Base, typename F, typename Pointer,
-                    typename std::enable_if<conjunction_v<
-                        negation<std::is_base_of<Base, std::decay_t<Pointer>>>,
-                        negation<is_reference_wrapper<std::decay_t<Pointer>>>
-                    >, int>::type = 0
+                    typename std::enable_if_t<
+                        !std::is_base_of<Base, std::decay_t<Pointer>>::value &&
+                        !is_reference_wrapper_v<std::decay_t<Pointer>>
+                    , int> = 0
                 >
                 constexpr auto invoke_member_object_impl(F Base::* f, Pointer&& ptr)
                     -> decltype ((*std::forward<Pointer>(ptr)).*f)
@@ -155,7 +99,7 @@ namespace kari
                 template
                 <
                     typename Base, typename F, typename Derived, typename... Args,
-                    typename std::enable_if<std::is_base_of<Base, std::decay_t<Derived>>::value, int>::type = 0
+                    typename std::enable_if_t<std::is_base_of<Base, std::decay_t<Derived>>::value, int> = 0
                 >
                 constexpr auto invoke_member_function_impl(F Base::* f, Derived&& ref, Args&&... args)
                     -> decltype ((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...))
@@ -166,7 +110,7 @@ namespace kari
                 template
                 <
                     typename Base, typename F, typename RefWrap, typename... Args,
-                    typename std::enable_if<is_reference_wrapper<std::decay_t<RefWrap>>::value, int>::type = 0
+                    typename std::enable_if_t<is_reference_wrapper<std::decay_t<RefWrap>>::value, int> = 0
                 >
                 constexpr auto invoke_member_function_impl(F Base::* f, RefWrap&& ref, Args&&... args)
                     -> decltype ((ref.get().*f)(std::forward<Args>(args)...))
@@ -177,10 +121,10 @@ namespace kari
                 template
                 <
                     typename Base, typename F, typename Pointer, typename... Args,
-                    typename std::enable_if<conjunction_v<
-                        negation<std::is_base_of<Base, std::decay_t<Pointer>>>,
-                        negation<is_reference_wrapper<std::decay_t<Pointer>>>
-                    >, int>::type = 0
+                    typename std::enable_if_t<
+                        !std::is_base_of<Base, std::decay_t<Pointer>>::value &&
+                        !is_reference_wrapper_v<std::decay_t<Pointer>>
+                    , int> = 0
                 >
                 constexpr auto invoke_member_function_impl(F Base::* f, Pointer&& ptr, Args&&... args)
                     -> decltype (((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...))
@@ -192,7 +136,7 @@ namespace kari
             template
             <
                 typename F, typename... Args,
-                typename std::enable_if<!std::is_member_pointer<std::decay_t<F>>::value, int>::type = 0
+                typename std::enable_if_t<!std::is_member_pointer<std::decay_t<F>>::value, int> = 0
             >
             constexpr auto invoke(F&& f, Args&&... args)
                 -> decltype (std::forward<F>(f)(std::forward<Args>(args)...))
@@ -203,7 +147,7 @@ namespace kari
             template
             <
                 typename F, typename T,
-                typename std::enable_if<std::is_member_object_pointer<std::decay_t<F>>::value, int>::type = 0
+                typename std::enable_if_t<std::is_member_object_pointer<std::decay_t<F>>::value, int> = 0
             >
             constexpr auto invoke(F&& f, T&& t)
                 -> decltype (detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t)))
@@ -214,7 +158,7 @@ namespace kari
             template
             <
                 typename F, typename... Args,
-                typename std::enable_if<std::is_member_function_pointer<std::decay_t<F>>::value, int>::type = 0
+                typename std::enable_if_t<std::is_member_function_pointer<std::decay_t<F>>::value, int> = 0
             >
             constexpr auto invoke(F&& f, Args&&... args)
                 -> decltype (detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...))
@@ -296,10 +240,10 @@ namespace kari
         template
         <
             std::size_t N, typename F, typename... Args,
-            typename std::enable_if<std_ext::conjunction_v<
-                std_ext::bool_constant<(N == 0)>,
-                std_ext::is_invocable<F, Args...>
-            >, int>::type = 0
+            typename std::enable_if_t<
+                (N == 0) &&
+                std_ext::is_invocable_v<F, Args...>
+            , int> = 0
         >
         constexpr auto make_curry(F&& f, std::tuple<Args...>&& args) {
             return std_ext::apply(std::forward<F>(f), std::move(args));
@@ -308,10 +252,10 @@ namespace kari
         template
         <
             std::size_t N, typename F, typename... Args,
-            typename std::enable_if<std_ext::disjunction_v<
-                std_ext::bool_constant<(N > 0)>,
-                std_ext::negation<std_ext::is_invocable<F, Args...>>
-            >, int>::type = 0
+            typename std::enable_if_t<
+                (N > 0) ||
+                !std_ext::is_invocable_v<F, Args...>
+            , int> = 0
         >
         constexpr decltype(auto) make_curry(F&& f, std::tuple<Args...>&& args) {
             return curry_t<
@@ -414,7 +358,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) curry(F&& f) {
         return std::forward<F>(f);
@@ -423,7 +367,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<!is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) curry(F&& f) {
         return detail::make_curry<0>(std::forward<F>(f));
@@ -441,7 +385,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) curryV(F&& f) {
         constexpr auto n = std::numeric_limits<std::size_t>::max();
@@ -451,7 +395,7 @@ namespace kari
     template
     <
         typename F,
-        typename std::enable_if<!is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) curryV(F&& f) {
         constexpr auto n = std::numeric_limits<std::size_t>::max();
@@ -470,7 +414,7 @@ namespace kari
     template
     <
         std::size_t N, typename F,
-        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) curryN(F&& f) {
         return std::forward<F>(f).template recurry<N>();
@@ -479,7 +423,7 @@ namespace kari
     template
     <
         std::size_t N, typename F,
-        typename std::enable_if<!is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) curryN(F&& f) {
         return detail::make_curry<N>(std::forward<F>(f));
@@ -575,8 +519,8 @@ namespace kari
     template
     <
         typename G, typename F,
-        typename std::enable_if<is_curried_v<std::decay_t<G>>, int>::type = 0,
-        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<is_curried_v<std::decay_t<G>>, int> = 0,
+        typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) operator|(G&& g, F&& f) {
         return fpipe(
@@ -587,8 +531,8 @@ namespace kari
     template
     <
         typename F, typename A,
-        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0,
-        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0
+        typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0,
+        typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0
     >
     constexpr decltype(auto) operator|(F&& f, A&& a) {
         return std::forward<F>(f)(std::forward<A>(a));
@@ -597,8 +541,8 @@ namespace kari
     template
     <
         typename A, typename F,
-        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0,
-        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0,
+        typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) operator|(A&& a, F&& f) {
         return std::forward<F>(f)(std::forward<A>(a));
@@ -611,8 +555,8 @@ namespace kari
     template
     <
         typename G, typename F,
-        typename std::enable_if<is_curried_v<std::decay_t<G>>, int>::type = 0,
-        typename std::enable_if<is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<is_curried_v<std::decay_t<G>>, int> = 0,
+        typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) operator*(G&& g, F&& f) {
         return fcompose(
@@ -623,8 +567,8 @@ namespace kari
     template
     <
         typename F, typename A,
-        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0,
-        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0
+        typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0,
+        typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0
     >
     constexpr decltype(auto) operator*(F&& f, A&& a) {
         return std::forward<F>(f)(std::forward<A>(a));
@@ -633,8 +577,8 @@ namespace kari
     template
     <
         typename A, typename F,
-        typename std::enable_if<!is_curried_v<std::decay_t<A>>, int>::type = 0,
-        typename std::enable_if< is_curried_v<std::decay_t<F>>, int>::type = 0
+        typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0,
+        typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0
     >
     constexpr decltype(auto) operator*(A&& a, F&& f) {
         return std::forward<F>(f)(std::forward<A>(a));
