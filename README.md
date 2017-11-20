@@ -18,7 +18,7 @@
 [appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
-[wandbox]: https://wandbox.org/permlink/IVcSfxEAG9xkJQpl
+[wandbox]: https://wandbox.org/permlink/l6uHui1884zfQNa4
 
 [kari]: https://github.com/BlackMATov/kari.hpp
 
