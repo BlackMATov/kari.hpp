@@ -7,6 +7,9 @@
 #include <type_traits>
 
 #define KARI_HPP_NOEXCEPT_RETURN(...) \
+    noexcept(noexcept(__VA_ARGS__)) { return __VA_ARGS__; }
+
+#define KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(...) \
     noexcept(noexcept(__VA_ARGS__)) -> decltype (__VA_ARGS__) { return __VA_ARGS__; }
 
 namespace kari
@@ -68,7 +71,8 @@ namespace kari
                     typename std::enable_if_t<std::is_base_of<Base, std::decay_t<Derived>>::value, int> = 0
                 >
                 constexpr auto invoke_member_object_impl(F Base::* f, Derived&& ref)
-                KARI_HPP_NOEXCEPT_RETURN(std::forward<Derived>(ref).*f)
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                    std::forward<Derived>(ref).*f)
 
                 template
                 <
@@ -76,7 +80,8 @@ namespace kari
                     typename std::enable_if_t<is_reference_wrapper<std::decay_t<RefWrap>>::value, int> = 0
                 >
                 constexpr auto invoke_member_object_impl(F Base::* f, RefWrap&& ref)
-                KARI_HPP_NOEXCEPT_RETURN(ref.get().*f)
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                    ref.get().*f)
 
                 template
                 <
@@ -87,7 +92,8 @@ namespace kari
                     , int> = 0
                 >
                 constexpr auto invoke_member_object_impl(F Base::* f, Pointer&& ptr)
-                KARI_HPP_NOEXCEPT_RETURN((*std::forward<Pointer>(ptr)).*f)
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                    (*std::forward<Pointer>(ptr)).*f)
 
                 //
                 // invoke_member_function_impl
@@ -99,7 +105,8 @@ namespace kari
                     typename std::enable_if_t<std::is_base_of<Base, std::decay_t<Derived>>::value, int> = 0
                 >
                 constexpr auto invoke_member_function_impl(F Base::* f, Derived&& ref, Args&&... args)
-                KARI_HPP_NOEXCEPT_RETURN((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...))
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                    (std::forward<Derived>(ref).*f)(std::forward<Args>(args)...))
 
                 template
                 <
@@ -107,7 +114,8 @@ namespace kari
                     typename std::enable_if_t<is_reference_wrapper<std::decay_t<RefWrap>>::value, int> = 0
                 >
                 constexpr auto invoke_member_function_impl(F Base::* f, RefWrap&& ref, Args&&... args)
-                KARI_HPP_NOEXCEPT_RETURN((ref.get().*f)(std::forward<Args>(args)...))
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                    (ref.get().*f)(std::forward<Args>(args)...))
 
                 template
                 <
@@ -118,7 +126,8 @@ namespace kari
                     , int> = 0
                 >
                 constexpr auto invoke_member_function_impl(F Base::* f, Pointer&& ptr, Args&&... args)
-                KARI_HPP_NOEXCEPT_RETURN(((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...))
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                    ((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...))
             }
 
             template
@@ -127,7 +136,8 @@ namespace kari
                 typename std::enable_if_t<!std::is_member_pointer<std::decay_t<F>>::value, int> = 0
             >
             constexpr auto invoke(F&& f, Args&&... args)
-            KARI_HPP_NOEXCEPT_RETURN(std::forward<F>(f)(std::forward<Args>(args)...))
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                std::forward<F>(f)(std::forward<Args>(args)...))
 
             template
             <
@@ -135,7 +145,8 @@ namespace kari
                 typename std::enable_if_t<std::is_member_object_pointer<std::decay_t<F>>::value, int> = 0
             >
             constexpr auto invoke(F&& f, T&& t)
-            KARI_HPP_NOEXCEPT_RETURN(detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t)))
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t)))
 
             template
             <
@@ -143,7 +154,8 @@ namespace kari
                 typename std::enable_if_t<std::is_member_function_pointer<std::decay_t<F>>::value, int> = 0
             >
             constexpr auto invoke(F&& f, Args&&... args)
-            KARI_HPP_NOEXCEPT_RETURN(detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...))
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+                detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...))
 
             //
             // invoke_result, invoke_result_t
@@ -225,7 +237,7 @@ namespace kari
             {
                 template < typename F, typename Tuple, std::size_t... I >
                 constexpr auto apply_impl(F&& f, Tuple&& args, std::index_sequence<I...>)
-                KARI_HPP_NOEXCEPT_RETURN(
+                KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
                     std_ext::invoke(
                         std::forward<F>(f),
                         std::get<I>(std::forward<Tuple>(args))...))
@@ -233,7 +245,7 @@ namespace kari
 
             template < typename F, typename Tuple >
             constexpr auto apply(F&& f, Tuple&& args)
-            KARI_HPP_NOEXCEPT_RETURN(
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
                 detail::apply_impl(
                     std::forward<F>(f),
                     std::forward<Tuple>(args),
@@ -257,9 +269,9 @@ namespace kari
                 std_ext::is_invocable_v<std::decay_t<F>, Args...>
             , int> = 0
         >
-        constexpr auto make_curry(F&& f, std::tuple<Args...>&& args) {
-            return std_ext::apply(std::forward<F>(f), std::move(args));
-        }
+        constexpr auto make_curry(F&& f, std::tuple<Args...>&& args)
+        KARI_HPP_NOEXCEPT_RETURN(
+            std_ext::apply(std::forward<F>(f), std::move(args)))
 
         template
         <
@@ -269,24 +281,25 @@ namespace kari
                 !std_ext::is_invocable_v<std::decay_t<F>, Args...>
             , int> = 0
         >
-        constexpr decltype(auto) make_curry(F&& f, std::tuple<Args...>&& args) {
-            return curry_t<
+        constexpr auto make_curry(F&& f, std::tuple<Args...>&& args)
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            curry_t<
                 N,
                 std::decay_t<F>,
                 Args...
-            >(std::forward<F>(f), std::move(args));
-        }
+            >(std::forward<F>(f), std::move(args)))
 
         template < std::size_t N, typename F >
-        constexpr decltype(auto) make_curry(F&& f) {
-            return make_curry<N>(std::forward<F>(f), std::make_tuple());
-        }
+        constexpr auto make_curry(F&& f)
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            make_curry<N>(std::forward<F>(f), std::make_tuple()))
     }
 
     template < std::size_t N, typename F, typename... Args >
     struct curry_t final {
         template < typename U >
         constexpr curry_t(U&& u, std::tuple<Args...>&& args)
+        noexcept(noexcept(F(std::forward<U>(u))) && noexcept(std::tuple<Args...>(std::move(args))))
         : f_(std::forward<U>(u))
         , args_(std::move(args)) {}
 
@@ -299,26 +312,43 @@ namespace kari
         // recurry
 
         template < std::size_t M >
-        constexpr decltype(auto) recurry() && {
+        constexpr decltype(auto) recurry() &&
+            noexcept(noexcept(
+                detail::make_curry<M>(
+                    std::move(std::declval<F>()),
+                    std::move(std::declval<std::tuple<Args...>>()))))
+        {
             return detail::make_curry<M>(
                 std::move(f_),
                 std::move(args_));
         }
 
         template < std::size_t M >
-        constexpr decltype(auto) recurry() const & {
-            auto self_copy = *this;
-            return std::move(self_copy).template recurry<M>();
+        constexpr decltype(auto) recurry() const &
+            noexcept(noexcept(
+                std::move(curry_t(*this)).template recurry<M>()))
+        {
+            return std::move(curry_t(*this)).template recurry<M>();
         }
 
         // operator(As&&...)
 
-        constexpr decltype(auto) operator()() && {
+        constexpr decltype(auto) operator()() &&
+            noexcept(noexcept(
+                std::move(*this).template recurry<0>()))
+        {
             return std::move(*this).template recurry<0>();
         }
 
         template < typename A >
-        constexpr decltype(auto) operator()(A&& a) && {
+        constexpr decltype(auto) operator()(A&& a) &&
+            noexcept(noexcept(
+                detail::make_curry<(N > 0 ? N - 1 : 0)>(
+                std::move(std::declval<F>()),
+                std::tuple_cat(
+                    std::move(std::declval<std::tuple<Args...>>()),
+                    std::make_tuple(std::forward<A>(a))))))
+        {
             return detail::make_curry<(N > 0 ? N - 1 : 0)>(
                 std::move(f_),
                 std::tuple_cat(
@@ -327,14 +357,19 @@ namespace kari
         }
 
         template < typename A, typename... As >
-        constexpr decltype(auto) operator()(A&& a, As&&... as) && {
+        constexpr decltype(auto) operator()(A&& a, As&&... as) &&
+            noexcept(noexcept(
+                std::move(*this)(std::forward<A>(a))(std::forward<As>(as)...)))
+        {
             return std::move(*this)(std::forward<A>(a))(std::forward<As>(as)...);
         }
 
         template < typename... As >
-        constexpr decltype(auto) operator()(As&&... as) const & {
-            auto self_copy = *this;
-            return std::move(self_copy)(std::forward<As>(as)...);
+        constexpr decltype(auto) operator()(As&&... as) const &
+            noexcept(noexcept(
+                std::move(curry_t(*this))(std::forward<As>(as)...)))
+        {
+            return std::move(curry_t(*this))(std::forward<As>(as)...);
         }
     private:
         F f_;
@@ -372,23 +407,23 @@ namespace kari
         typename F,
         typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) curry(F&& f) {
-        return std::forward<F>(f);
-    }
+    constexpr auto curry(F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f))
 
     template
     <
         typename F,
         typename std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) curry(F&& f) {
-        return detail::make_curry<0>(std::forward<F>(f));
-    }
+    constexpr auto curry(F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        detail::make_curry<0>(std::forward<F>(f)))
 
     template < typename F, typename... Args >
-    constexpr decltype(auto) curry(F&& f, Args&&... args) {
-        return curry(std::forward<F>(f))(std::forward<Args>(args)...);
-    }
+    constexpr auto curry(F&& f, Args&&... args)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        kari::curry(std::forward<F>(f))(std::forward<Args>(args)...))
 
     //
     // curryV
@@ -397,27 +432,27 @@ namespace kari
     template
     <
         typename F,
+        std::size_t MaxN = std::numeric_limits<std::size_t>::max(),
         typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) curryV(F&& f) {
-        constexpr auto n = std::numeric_limits<std::size_t>::max();
-        return std::forward<F>(f).template recurry<n>();
-    }
+    constexpr auto curryV(F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f).template recurry<MaxN>())
 
     template
     <
         typename F,
+        std::size_t MaxN = std::numeric_limits<std::size_t>::max(),
         typename std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) curryV(F&& f) {
-        constexpr auto n = std::numeric_limits<std::size_t>::max();
-        return detail::make_curry<n>(std::forward<F>(f));
-    }
+    constexpr auto curryV(F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        detail::make_curry<MaxN>(std::forward<F>(f)))
 
     template < typename F, typename... Args >
-    constexpr decltype(auto) curryV(F&& f, Args&&... args) {
-        return curryV(std::forward<F>(f))(std::forward<Args>(args)...);
-    }
+    constexpr auto curryV(F&& f, Args&&... args)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        kari::curryV(std::forward<F>(f))(std::forward<Args>(args)...))
 
     //
     // curryN
@@ -428,26 +463,28 @@ namespace kari
         std::size_t N, typename F,
         typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) curryN(F&& f) {
-        return std::forward<F>(f).template recurry<N>();
-    }
+    constexpr auto curryN(F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f).template recurry<N>())
 
     template
     <
         std::size_t N, typename F,
         typename std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) curryN(F&& f) {
-        return detail::make_curry<N>(std::forward<F>(f));
-    }
+    constexpr auto curryN(F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        detail::make_curry<N>(std::forward<F>(f)))
 
-    template < std::size_t N, typename F, typename... Args >
-    constexpr decltype(auto) curryN(F&& f, Args&&... args) {
-        static_assert(
-            std::numeric_limits<std::size_t>::max() - sizeof...(Args) >= N,
-            "N too big");
-        return curryN<N + sizeof...(Args)>(std::forward<F>(f))(std::forward<Args>(args)...);
-    }
+    template
+    <
+        std::size_t N, typename F, typename... Args,
+        std::size_t MaxN = std::numeric_limits<std::size_t>::max(),
+        typename std::enable_if_t<MaxN - sizeof...(Args) >= N, int> = 0
+    >
+    constexpr auto curryN(F&& f, Args&&... args)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        kari::curryN<N + sizeof...(Args)>(std::forward<F>(f))(std::forward<Args>(args)...))
 }
 
 namespace kari
@@ -679,6 +716,7 @@ namespace kari
 }
 
 #undef KARI_HPP_NOEXCEPT_RETURN
+#undef KARI_HPP_NOEXCEPT_DECLTYPE_RETURN
 
 // Local Variables:
 // indent-tabs-mode: nil
