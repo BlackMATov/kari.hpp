@@ -176,8 +176,8 @@ namespace kari
                 struct invoke_result_impl {};
 
                 template < typename F, typename... Args >
-                struct invoke_result_impl<void_t<decltype(invoke(std::declval<F>(), std::declval<Args>()...))>, F, Args...> {
-                    using type = decltype(invoke(std::declval<F>(), std::declval<Args>()...));
+                struct invoke_result_impl<void_t<decltype(std_ext::invoke(std::declval<F>(), std::declval<Args>()...))>, F, Args...> {
+                    using type = decltype(std_ext::invoke(std::declval<F>(), std::declval<Args>()...));
                 };
             }
 
