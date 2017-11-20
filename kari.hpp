@@ -41,16 +41,16 @@ namespace kari
             {
                 template < typename T >
                 struct is_reference_wrapper_impl
-                : public std::false_type {};
+                : std::false_type {};
 
-                template < typename T >
-                struct is_reference_wrapper_impl<std::reference_wrapper<T>>
-                : public std::true_type {};
+                template < typename U >
+                struct is_reference_wrapper_impl<std::reference_wrapper<U>>
+                : std::true_type {};
             }
 
             template < typename T >
             struct is_reference_wrapper
-            : public detail::is_reference_wrapper_impl<std::remove_cv_t<T>> {};
+            : detail::is_reference_wrapper_impl<std::remove_cv_t<T>> {};
 
             template < typename T >
             constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
@@ -204,30 +204,6 @@ namespace kari
 
             template < typename F, typename... Args >
             constexpr bool is_invocable_v = is_invocable<F, Args...>::value;
-
-            //
-            // is_nothrow_invocable, is_nothrow_invocable_v
-            //
-
-            namespace detail
-            {
-                template < bool Invocable, typename F, typename... Args >
-                struct is_nothrow_invocable_impl
-                : std::false_type {};
-
-                template < typename F, typename... Args >
-                struct is_nothrow_invocable_impl<true, F, Args...>
-                : std::integral_constant<
-                    bool,
-                    noexcept(std_ext::invoke(std::declval<F>(), std::declval<Args>()...))> {};
-            }
-
-            template < typename F, typename... Args >
-            struct is_nothrow_invocable
-            : detail::is_nothrow_invocable_impl<is_invocable_v<F, Args...>, F, Args...> {};
-
-            template < typename F, typename... Args >
-            constexpr bool is_nothrow_invocable_v = is_nothrow_invocable<F, Args...>::value;
 
             //
             // apply
@@ -496,9 +472,9 @@ namespace kari
 
     struct fid_t {
         template < typename A >
-        constexpr decltype(auto) operator()(A&& a) const {
-            return std::forward<A>(a);
-        }
+        constexpr auto operator()(A&& a) const
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            std::forward<A>(a))
     };
     constexpr auto fid = curry(fid_t{});
 
@@ -508,10 +484,9 @@ namespace kari
 
     struct fconst_t {
         template < typename A, typename B >
-        decltype(auto) operator()(A&& a, B&& b) const {
-            (void)b;
-            return std::forward<A>(a);
-        }
+        constexpr auto operator()(A&& a, B&&) const
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            std::forward<A>(a))
     };
     constexpr auto fconst = curry(fconst_t{});
 
@@ -521,12 +496,12 @@ namespace kari
 
     struct fflip_t {
         template < typename F, typename A, typename B >
-        constexpr decltype(auto) operator()(F&& f, A&& a, B&& b) const {
-            return curry(
+        constexpr auto operator()(F&& f, A&& a, B&& b) const
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            curry(
                 std::forward<F>(f),
                 std::forward<B>(b),
-                std::forward<A>(a));
-        }
+                std::forward<A>(a)))
     };
     constexpr auto fflip = curry(fflip_t{});
 
@@ -536,13 +511,13 @@ namespace kari
 
     struct fpipe_t {
         template < typename G, typename F, typename A >
-        constexpr decltype(auto) operator()(G&& g, F&& f, A&& a) const {
-            return curry(
+        constexpr auto operator()(G&& g, F&& f, A&& a) const
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            curry(
                 std::forward<F>(f),
                 curry(
                     std::forward<G>(g),
-                    std::forward<A>(a)));
-        }
+                    std::forward<A>(a))))
     };
     constexpr auto fpipe = curry(fpipe_t{});
 
@@ -552,13 +527,13 @@ namespace kari
 
     struct fcompose_t {
         template < typename G, typename F, typename A >
-        constexpr decltype(auto) operator()(G&& g, F&& f, A&& a) const {
-            return curry(
+        constexpr auto operator()(G&& g, F&& f, A&& a) const
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+            curry(
                 std::forward<G>(g),
                 curry(
                     std::forward<F>(f),
-                    std::forward<A>(a)));
-        }
+                    std::forward<A>(a))))
     };
     constexpr auto fcompose = curry(fcompose_t{});
 
@@ -572,11 +547,11 @@ namespace kari
         typename std::enable_if_t<is_curried_v<std::decay_t<G>>, int> = 0,
         typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) operator|(G&& g, F&& f) {
-        return fpipe(
+    constexpr auto operator|(G&& g, F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        fpipe(
             std::forward<G>(g),
-            std::forward<F>(f));
-    }
+            std::forward<F>(f)))
 
     template
     <
@@ -584,9 +559,9 @@ namespace kari
         typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0,
         typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0
     >
-    constexpr decltype(auto) operator|(F&& f, A&& a) {
-        return std::forward<F>(f)(std::forward<A>(a));
-    }
+    constexpr auto operator|(F&& f, A&& a)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f)(std::forward<A>(a)))
 
     template
     <
@@ -594,9 +569,9 @@ namespace kari
         typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0,
         typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) operator|(A&& a, F&& f) {
-        return std::forward<F>(f)(std::forward<A>(a));
-    }
+    constexpr auto operator|(A&& a, F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f)(std::forward<A>(a)))
 
     //
     // fcompose operators
@@ -608,11 +583,11 @@ namespace kari
         typename std::enable_if_t<is_curried_v<std::decay_t<G>>, int> = 0,
         typename std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) operator*(G&& g, F&& f) {
-        return fcompose(
+    constexpr auto operator*(G&& g, F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        fcompose(
             std::forward<G>(g),
-            std::forward<F>(f));
-    }
+            std::forward<F>(f)))
 
     template
     <
@@ -620,9 +595,9 @@ namespace kari
         typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0,
         typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0
     >
-    constexpr decltype(auto) operator*(F&& f, A&& a) {
-        return std::forward<F>(f)(std::forward<A>(a));
-    }
+    constexpr auto operator*(F&& f, A&& a)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f)(std::forward<A>(a)))
 
     template
     <
@@ -630,9 +605,9 @@ namespace kari
         typename std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0,
         typename std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0
     >
-    constexpr decltype(auto) operator*(A&& a, F&& f) {
-        return std::forward<F>(f)(std::forward<A>(a));
-    }
+    constexpr auto operator*(A&& a, F&& f)
+    KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(
+        std::forward<F>(f)(std::forward<A>(a)))
 }
 
 namespace kari
@@ -642,77 +617,66 @@ namespace kari
         struct us_t {};
         constexpr us_t _{};
 
-        // `op` _
+        //
+        // is_underscore, is_underscore_v
+        //
 
-        constexpr auto operator - (us_t) { return curry(std::negate<>()); }
-        constexpr auto operator ~ (us_t) { return curry(std::bit_not<>()); }
-        constexpr auto operator ! (us_t) { return curry(std::logical_not<>()); }
+        template < typename T >
+        struct is_underscore
+        : std::integral_constant<bool, std::is_same<us_t, std::remove_cv_t<T>>::value> {};
 
-        // _ `op` _
+        template < typename T >
+        constexpr bool is_underscore_v = is_underscore<T>::value;
 
-        constexpr auto operator +  (us_t, us_t) { return curry(std::plus<>()); }
-        constexpr auto operator -  (us_t, us_t) { return curry(std::minus<>()); }
-        constexpr auto operator *  (us_t, us_t) { return curry(std::multiplies<>()); }
-        constexpr auto operator /  (us_t, us_t) { return curry(std::divides<>()); }
-        constexpr auto operator %  (us_t, us_t) { return curry(std::modulus<>()); }
+        //
+        // unary operators
+        //
 
-        constexpr auto operator <  (us_t, us_t) { return curry(std::less<>()); }
-        constexpr auto operator >  (us_t, us_t) { return curry(std::greater<>()); }
-        constexpr auto operator <= (us_t, us_t) { return curry(std::less_equal<>()); }
-        constexpr auto operator >= (us_t, us_t) { return curry(std::greater_equal<>()); }
-        constexpr auto operator == (us_t, us_t) { return curry(std::equal_to<>()); }
-        constexpr auto operator != (us_t, us_t) { return curry(std::not_equal_to<>()); }
+        #define KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(op, func) \
+            constexpr auto operator op (us_t) KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func))
 
-        constexpr auto operator |  (us_t, us_t) { return curry(std::bit_or<>()); }
-        constexpr auto operator &  (us_t, us_t) { return curry(std::bit_and<>()); }
-        constexpr auto operator ^  (us_t, us_t) { return curry(std::bit_xor<>()); }
+            KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(-, std::negate<>())
+            KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(~, std::bit_not<>())
+            KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(!, std::logical_not<>())
+        #undef KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP
 
-        constexpr auto operator || (us_t, us_t) { return curry(std::logical_or<>()); }
-        constexpr auto operator && (us_t, us_t) { return curry(std::logical_and<>()); }
+        //
+        // binary operators
+        //
 
-        // A `op` _
+        #define KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(op, func) \
+            constexpr auto operator op (us_t, us_t) \
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func)) \
+            \
+            template < typename A, typename std::enable_if_t<!is_underscore_v<std::decay_t<A>>, int> = 0 > \
+            constexpr auto operator op (A&& a, us_t) \
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func, std::forward<A>(a))) \
+            \
+            template < typename B, typename std::enable_if_t<!is_underscore_v<std::decay_t<B>>, int> = 0 > \
+            constexpr auto operator op (us_t, B&& b) \
+            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(fflip(func, std::forward<B>(b)))
 
-        template < typename A > constexpr auto operator +  (A&& a, us_t) { return (_ +  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator -  (A&& a, us_t) { return (_ -  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator *  (A&& a, us_t) { return (_ *  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator /  (A&& a, us_t) { return (_ /  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator %  (A&& a, us_t) { return (_ %  _)(std::forward<A>(a)); }
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(+ , std::plus<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(- , std::minus<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(* , std::multiplies<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(/ , std::divides<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(% , std::modulus<>())
 
-        template < typename A > constexpr auto operator <  (A&& a, us_t) { return (_ <  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator >  (A&& a, us_t) { return (_ >  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator <= (A&& a, us_t) { return (_ <= _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator >= (A&& a, us_t) { return (_ >= _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator == (A&& a, us_t) { return (_ == _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator != (A&& a, us_t) { return (_ != _)(std::forward<A>(a)); }
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(< , std::less<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(> , std::greater<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(<=, std::less_equal<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(>=, std::greater_equal<>())
+            
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(==, std::equal_to<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(!=, std::not_equal_to<>())
 
-        template < typename A > constexpr auto operator |  (A&& a, us_t) { return (_ |  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator &  (A&& a, us_t) { return (_ &  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator ^  (A&& a, us_t) { return (_ ^  _)(std::forward<A>(a)); }
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(| , std::bit_or<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(& , std::bit_and<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(^ , std::bit_xor<>())
 
-        template < typename A > constexpr auto operator || (A&& a, us_t) { return (_ || _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator && (A&& a, us_t) { return (_ && _)(std::forward<A>(a)); }
-
-        // _ `op` A
-
-        template < typename A > constexpr auto operator +  (us_t, A&& a) { return fflip(_ +  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator -  (us_t, A&& a) { return fflip(_ -  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator *  (us_t, A&& a) { return fflip(_ *  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator /  (us_t, A&& a) { return fflip(_ /  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator %  (us_t, A&& a) { return fflip(_ %  _)(std::forward<A>(a)); }
-
-        template < typename A > constexpr auto operator <  (us_t, A&& a) { return fflip(_ <  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator >  (us_t, A&& a) { return fflip(_ >  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator <= (us_t, A&& a) { return fflip(_ <= _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator >= (us_t, A&& a) { return fflip(_ >= _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator == (us_t, A&& a) { return fflip(_ == _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator != (us_t, A&& a) { return fflip(_ != _)(std::forward<A>(a)); }
-
-        template < typename A > constexpr auto operator |  (us_t, A&& a) { return fflip(_ |  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator &  (us_t, A&& a) { return fflip(_ &  _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator ^  (us_t, A&& a) { return fflip(_ ^  _)(std::forward<A>(a)); }
-
-        template < typename A > constexpr auto operator || (us_t, A&& a) { return fflip(_ || _)(std::forward<A>(a)); }
-        template < typename A > constexpr auto operator && (us_t, A&& a) { return fflip(_ && _)(std::forward<A>(a)); }
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(||, std::logical_or<>())
+            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(&&, std::logical_and<>())
+        #undef KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP
     }
 }
 
