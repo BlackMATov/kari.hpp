@@ -6,6 +6,9 @@
 #include <functional>
 #include <type_traits>
 
+#define KARI_HPP_NOEXCEPT_RETURN(...) \
+    noexcept(noexcept(__VA_ARGS__)) -> decltype (__VA_ARGS__) { return __VA_ARGS__; }
+
 namespace kari
 {
     namespace detail
@@ -59,102 +62,88 @@ namespace kari
                 // invoke_member_object_impl
                 //
 
-                template < typename Base, typename F, typename Derived >
+                template
+                <
+                    typename Base, typename F, typename Derived,
+                    typename std::enable_if_t<std::is_base_of<Base, std::decay_t<Derived>>::value, int> = 0
+                >
                 constexpr auto invoke_member_object_impl(F Base::* f, Derived&& ref)
-                    noexcept(noexcept(std::forward<Derived>(ref).*f))
-                    -> std::enable_if_t<
-                        std::is_base_of<Base, std::decay_t<Derived>>::value,
-                        decltype (std::forward<Derived>(ref).*f)>
-                {
-                    return std::forward<Derived>(ref).*f;
-                }
+                KARI_HPP_NOEXCEPT_RETURN(std::forward<Derived>(ref).*f)
 
-                template < typename Base, typename F, typename RefWrap >
+                template
+                <
+                    typename Base, typename F, typename RefWrap,
+                    typename std::enable_if_t<is_reference_wrapper<std::decay_t<RefWrap>>::value, int> = 0
+                >
                 constexpr auto invoke_member_object_impl(F Base::* f, RefWrap&& ref)
-                    noexcept(noexcept(ref.get().*f))
-                    -> std::enable_if_t<
-                        is_reference_wrapper<std::decay_t<RefWrap>>::value,
-                        decltype (ref.get().*f)>
-                {
-                    return ref.get().*f;
-                }
+                KARI_HPP_NOEXCEPT_RETURN(ref.get().*f)
 
-                template < typename Base, typename F, typename Pointer >
-                constexpr auto invoke_member_object_impl(F Base::* f, Pointer&& ptr)
-                    noexcept(noexcept((*std::forward<Pointer>(ptr)).*f))
-                    -> std::enable_if_t<
+                template
+                <
+                    typename Base, typename F, typename Pointer,
+                    typename std::enable_if_t<
                         !std::is_base_of<Base, std::decay_t<Pointer>>::value &&
-                        !is_reference_wrapper_v<std::decay_t<Pointer>>,
-                        decltype ((*std::forward<Pointer>(ptr)).*f)>
-                {
-                    return (*std::forward<Pointer>(ptr)).*f;
-                }
+                        !is_reference_wrapper_v<std::decay_t<Pointer>>
+                    , int> = 0
+                >
+                constexpr auto invoke_member_object_impl(F Base::* f, Pointer&& ptr)
+                KARI_HPP_NOEXCEPT_RETURN((*std::forward<Pointer>(ptr)).*f)
 
                 //
                 // invoke_member_function_impl
                 //
 
-                template < typename Base, typename F, typename Derived, typename... Args >
+                template
+                <
+                    typename Base, typename F, typename Derived, typename... Args,
+                    typename std::enable_if_t<std::is_base_of<Base, std::decay_t<Derived>>::value, int> = 0
+                >
                 constexpr auto invoke_member_function_impl(F Base::* f, Derived&& ref, Args&&... args)
-                    noexcept(noexcept((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...)))
-                    -> std::enable_if_t<
-                        std::is_base_of<Base, std::decay_t<Derived>>::value,
-                        decltype ((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...))>
-                {
-                    return (std::forward<Derived>(ref).*f)(std::forward<Args>(args)...);
-                }
+                KARI_HPP_NOEXCEPT_RETURN((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...))
 
-                template < typename Base, typename F, typename RefWrap, typename... Args >
+                template
+                <
+                    typename Base, typename F, typename RefWrap, typename... Args,
+                    typename std::enable_if_t<is_reference_wrapper<std::decay_t<RefWrap>>::value, int> = 0
+                >
                 constexpr auto invoke_member_function_impl(F Base::* f, RefWrap&& ref, Args&&... args)
-                    noexcept(noexcept((ref.get().*f)(std::forward<Args>(args)...)))
-                    -> std::enable_if_t<
-                        is_reference_wrapper<std::decay_t<RefWrap>>::value,
-                        decltype ((ref.get().*f)(std::forward<Args>(args)...))>
-                {
-                    return (ref.get().*f)(std::forward<Args>(args)...);
-                }
+                KARI_HPP_NOEXCEPT_RETURN((ref.get().*f)(std::forward<Args>(args)...))
 
-                template < typename Base, typename F, typename Pointer, typename... Args >
-                constexpr auto invoke_member_function_impl(F Base::* f, Pointer&& ptr, Args&&... args)
-                    noexcept(noexcept(((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...)))
-                    -> std::enable_if_t<
+                template
+                <
+                    typename Base, typename F, typename Pointer, typename... Args,
+                    typename std::enable_if_t<
                         !std::is_base_of<Base, std::decay_t<Pointer>>::value &&
-                        !is_reference_wrapper_v<std::decay_t<Pointer>>,
-                        decltype (((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...))>
-                {
-                    return ((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...);
-                }
+                        !is_reference_wrapper_v<std::decay_t<Pointer>>
+                    , int> = 0
+                >
+                constexpr auto invoke_member_function_impl(F Base::* f, Pointer&& ptr, Args&&... args)
+                KARI_HPP_NOEXCEPT_RETURN(((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...))
             }
 
-            template < typename F, typename... Args >
+            template
+            <
+                typename F, typename... Args,
+                typename std::enable_if_t<!std::is_member_pointer<std::decay_t<F>>::value, int> = 0
+            >
             constexpr auto invoke(F&& f, Args&&... args)
-                noexcept(noexcept(std::forward<F>(f)(std::forward<Args>(args)...)))
-                -> std::enable_if_t<
-                    !std::is_member_pointer<std::decay_t<F>>::value,
-                    decltype (std::forward<F>(f)(std::forward<Args>(args)...))>
-            {
-                return std::forward<F>(f)(std::forward<Args>(args)...);
-            }
+            KARI_HPP_NOEXCEPT_RETURN(std::forward<F>(f)(std::forward<Args>(args)...))
 
-            template < typename F, typename T >
+            template
+            <
+                typename F, typename T,
+                typename std::enable_if_t<std::is_member_object_pointer<std::decay_t<F>>::value, int> = 0
+            >
             constexpr auto invoke(F&& f, T&& t)
-                noexcept(noexcept(detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t))))
-                -> std::enable_if_t<
-                    std::is_member_object_pointer<std::decay_t<F>>::value,
-                    decltype (detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t)))>
-            {
-                return detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t));
-            }
+            KARI_HPP_NOEXCEPT_RETURN(detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t)))
 
-            template < typename F, typename... Args >
+            template
+            <
+                typename F, typename... Args,
+                typename std::enable_if_t<std::is_member_function_pointer<std::decay_t<F>>::value, int> = 0
+            >
             constexpr auto invoke(F&& f, Args&&... args)
-                noexcept(noexcept(detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...)))
-                -> std::enable_if_t<
-                    std::is_member_function_pointer<std::decay_t<F>>::value,
-                    decltype (detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...))>
-            {
-                return detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...);
-            }
+            KARI_HPP_NOEXCEPT_RETURN(detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...))
 
             //
             // invoke_result, invoke_result_t
@@ -235,18 +224,20 @@ namespace kari
             namespace detail
             {
                 template < typename F, typename Tuple, std::size_t... I >
-                constexpr decltype(auto) apply_impl(F&& f, Tuple&& args, std::index_sequence<I...>) {
-                    return std_ext::invoke(std::forward<F>(f), std::get<I>(std::forward<Tuple>(args))...);
-                }
+                constexpr auto apply_impl(F&& f, Tuple&& args, std::index_sequence<I...>)
+                KARI_HPP_NOEXCEPT_RETURN(
+                    std_ext::invoke(
+                        std::forward<F>(f),
+                        std::get<I>(std::forward<Tuple>(args))...))
             }
 
             template < typename F, typename Tuple >
-            constexpr decltype(auto) apply(F&& f, Tuple&& args) {
-                return detail::apply_impl(
+            constexpr auto apply(F&& f, Tuple&& args)
+            KARI_HPP_NOEXCEPT_RETURN(
+                detail::apply_impl(
                     std::forward<F>(f),
                     std::forward<Tuple>(args),
-                    std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
-            }
+                    std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>()))
         }
     }
 }
@@ -686,6 +677,8 @@ namespace kari
         template < typename A > constexpr auto operator && (us_t, A&& a) { return fflip(_ && _)(std::forward<A>(a)); }
     }
 }
+
+#undef KARI_HPP_NOEXCEPT_RETURN
 
 // Local Variables:
 // indent-tabs-mode: nil
