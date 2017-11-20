@@ -216,7 +216,7 @@ namespace kari
 
             template < typename F, typename Tuple, std::size_t... I >
             constexpr decltype(auto) apply_impl(F&& f, Tuple&& args, std::index_sequence<I...>) {
-                return invoke(std::forward<F>(f), std::get<I>(std::forward<Tuple>(args))...);
+                return std_ext::invoke(std::forward<F>(f), std::get<I>(std::forward<Tuple>(args))...);
             }
 
             template < typename F, typename Tuple >
