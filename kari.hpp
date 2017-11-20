@@ -326,7 +326,7 @@ namespace kari
         template < std::size_t M >
         constexpr decltype(auto) recurry() const &
             noexcept(noexcept(
-                std::move(curry_t(*this)).template recurry<M>()))
+                std::move(std::declval<curry_t>()).template recurry<M>()))
         {
             return std::move(curry_t(*this)).template recurry<M>();
         }
@@ -335,7 +335,7 @@ namespace kari
 
         constexpr decltype(auto) operator()() &&
             noexcept(noexcept(
-                std::move(*this).template recurry<0>()))
+                std::move(std::declval<curry_t>()).template recurry<0>()))
         {
             return std::move(*this).template recurry<0>();
         }
@@ -359,7 +359,7 @@ namespace kari
         template < typename A, typename... As >
         constexpr decltype(auto) operator()(A&& a, As&&... as) &&
             noexcept(noexcept(
-                std::move(*this)(std::forward<A>(a))(std::forward<As>(as)...)))
+                std::move(std::declval<curry_t>())(std::forward<A>(a))(std::forward<As>(as)...)))
         {
             return std::move(*this)(std::forward<A>(a))(std::forward<As>(as)...);
         }
@@ -367,7 +367,7 @@ namespace kari
         template < typename... As >
         constexpr decltype(auto) operator()(As&&... as) const &
             noexcept(noexcept(
-                std::move(curry_t(*this))(std::forward<As>(as)...)))
+                std::move(std::declval<curry_t>())(std::forward<As>(as)...)))
         {
             return std::move(curry_t(*this))(std::forward<As>(as)...);
         }
