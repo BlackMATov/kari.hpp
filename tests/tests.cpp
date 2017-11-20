@@ -707,6 +707,27 @@ TEST_CASE("kari_details") {
             REQUIRE(std_ext::invoke(&box2::ov, std::ref(b2)) == 10);
         }
     }
+    SECTION("is_invocable/is_nothrow_invocable") {
+        using namespace kari::detail;
+        
+        const auto f1 = [](int i, int j){
+            return i + j;
+        };
+        
+        const auto f2 = [](int i, int j) noexcept {
+            return i + j;
+        };
+
+        static_assert( std_ext::is_invocable_v<decltype(f1), int, int>, "static unit test error");
+        static_assert(!std_ext::is_invocable_v<decltype(f1), int, box>, "static unit test error");
+        static_assert( std_ext::is_invocable_v<decltype(f2), int, int>, "static unit test error");
+        static_assert(!std_ext::is_invocable_v<decltype(f2), int, box>, "static unit test error");
+
+        static_assert(!std_ext::is_nothrow_invocable_v<decltype(f1), int, int>, "static unit test error");
+        static_assert(!std_ext::is_nothrow_invocable_v<decltype(f1), int, box>, "static unit test error");
+        static_assert( std_ext::is_nothrow_invocable_v<decltype(f2), int, int>, "static unit test error");
+        static_assert(!std_ext::is_nothrow_invocable_v<decltype(f2), int, box>, "static unit test error");
+    }
 }
 
 TEST_CASE("kari_helpers") {

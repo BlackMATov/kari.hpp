@@ -61,6 +61,7 @@ namespace kari
 
                 template < typename Base, typename F, typename Derived >
                 constexpr auto invoke_member_object_impl(F Base::* f, Derived&& ref)
+                    noexcept(noexcept(std::forward<Derived>(ref).*f))
                     -> std::enable_if_t<
                         std::is_base_of<Base, std::decay_t<Derived>>::value,
                         decltype (std::forward<Derived>(ref).*f)>
@@ -70,6 +71,7 @@ namespace kari
 
                 template < typename Base, typename F, typename RefWrap >
                 constexpr auto invoke_member_object_impl(F Base::* f, RefWrap&& ref)
+                    noexcept(noexcept(ref.get().*f))
                     -> std::enable_if_t<
                         is_reference_wrapper<std::decay_t<RefWrap>>::value,
                         decltype (ref.get().*f)>
@@ -79,6 +81,7 @@ namespace kari
 
                 template < typename Base, typename F, typename Pointer >
                 constexpr auto invoke_member_object_impl(F Base::* f, Pointer&& ptr)
+                    noexcept(noexcept((*std::forward<Pointer>(ptr)).*f))
                     -> std::enable_if_t<
                         !std::is_base_of<Base, std::decay_t<Pointer>>::value &&
                         !is_reference_wrapper_v<std::decay_t<Pointer>>,
@@ -93,6 +96,7 @@ namespace kari
 
                 template < typename Base, typename F, typename Derived, typename... Args >
                 constexpr auto invoke_member_function_impl(F Base::* f, Derived&& ref, Args&&... args)
+                    noexcept(noexcept((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...)))
                     -> std::enable_if_t<
                         std::is_base_of<Base, std::decay_t<Derived>>::value,
                         decltype ((std::forward<Derived>(ref).*f)(std::forward<Args>(args)...))>
@@ -102,6 +106,7 @@ namespace kari
 
                 template < typename Base, typename F, typename RefWrap, typename... Args >
                 constexpr auto invoke_member_function_impl(F Base::* f, RefWrap&& ref, Args&&... args)
+                    noexcept(noexcept((ref.get().*f)(std::forward<Args>(args)...)))
                     -> std::enable_if_t<
                         is_reference_wrapper<std::decay_t<RefWrap>>::value,
                         decltype ((ref.get().*f)(std::forward<Args>(args)...))>
@@ -111,6 +116,7 @@ namespace kari
 
                 template < typename Base, typename F, typename Pointer, typename... Args >
                 constexpr auto invoke_member_function_impl(F Base::* f, Pointer&& ptr, Args&&... args)
+                    noexcept(noexcept(((*std::forward<Pointer>(ptr)).*f)(std::forward<Args>(args)...)))
                     -> std::enable_if_t<
                         !std::is_base_of<Base, std::decay_t<Pointer>>::value &&
                         !is_reference_wrapper_v<std::decay_t<Pointer>>,
@@ -122,6 +128,7 @@ namespace kari
 
             template < typename F, typename... Args >
             constexpr auto invoke(F&& f, Args&&... args)
+                noexcept(noexcept(std::forward<F>(f)(std::forward<Args>(args)...)))
                 -> std::enable_if_t<
                     !std::is_member_pointer<std::decay_t<F>>::value,
                     decltype (std::forward<F>(f)(std::forward<Args>(args)...))>
@@ -131,6 +138,7 @@ namespace kari
 
             template < typename F, typename T >
             constexpr auto invoke(F&& f, T&& t)
+                noexcept(noexcept(detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t))))
                 -> std::enable_if_t<
                     std::is_member_object_pointer<std::decay_t<F>>::value,
                     decltype (detail::invoke_member_object_impl(std::forward<F>(f), std::forward<T>(t)))>
@@ -140,6 +148,7 @@ namespace kari
 
             template < typename F, typename... Args >
             constexpr auto invoke(F&& f, Args&&... args)
+                noexcept(noexcept(detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...)))
                 -> std::enable_if_t<
                     std::is_member_function_pointer<std::decay_t<F>>::value,
                     decltype (detail::invoke_member_function_impl(std::forward<F>(f), std::forward<Args>(args)...))>
@@ -194,6 +203,30 @@ namespace kari
 
             template < typename F, typename... Args >
             constexpr bool is_invocable_v = is_invocable<F, Args...>::value;
+
+            //
+            // is_nothrow_invocable, is_nothrow_invocable_v
+            //
+
+            namespace detail
+            {
+                template < bool Invocable, typename F, typename... Args >
+                struct is_nothrow_invocable_impl
+                : std::false_type {};
+
+                template < typename F, typename... Args >
+                struct is_nothrow_invocable_impl<true, F, Args...>
+                : std::integral_constant<
+                    bool,
+                    noexcept(std_ext::invoke(std::declval<F>(), std::declval<Args>()...))> {};
+            }
+
+            template < typename F, typename... Args >
+            struct is_nothrow_invocable
+            : detail::is_nothrow_invocable_impl<is_invocable_v<F, Args...>, F, Args...> {};
+
+            template < typename F, typename... Args >
+            constexpr bool is_nothrow_invocable_v = is_nothrow_invocable<F, Args...>::value;
 
             //
             // apply
