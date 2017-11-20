@@ -18,7 +18,7 @@
 [appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
-[wandbox]: https://wandbox.org/permlink/eKfLeyjXvOLfzQvG
+[wandbox]: https://wandbox.org/permlink/IVcSfxEAG9xkJQpl
 
 [kari]: https://github.com/BlackMATov/kari.hpp
 
@@ -80,6 +80,27 @@ auto c2 = kari::curry(foo)(38)(3,1);
 
 // output: 42,42,42
 std::cout << c0 << "," << c1 << "," << c2 << std::endl;
+```
+
+### Binding member functions and member objects
+
+```cpp
+struct Foo {
+  int v = 40;
+  int addV(int add) {
+    v += add;
+    return v;
+  }
+} foo;
+
+auto c0 = kari::curry(&Foo::addV);
+auto c1 = kari::curry(&Foo::v);
+
+auto r0 = c0(std::ref(foo))(2);
+auto r1 = c1(foo);
+
+// output: 42,42
+std::cout << r0 << "," << r1 << std::endl;
 ```
 
 ## API
