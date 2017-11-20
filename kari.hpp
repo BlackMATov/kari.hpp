@@ -172,11 +172,13 @@ namespace kari
 
             namespace detail
             {
+                struct invoke_result_impl_tag {};
+
                 template < typename Void, typename F, typename... Args >
                 struct invoke_result_impl {};
 
                 template < typename F, typename... Args >
-                struct invoke_result_impl<void_t<decltype(std_ext::invoke(std::declval<F>(), std::declval<Args>()...))>, F, Args...> {
+                struct invoke_result_impl<void_t<invoke_result_impl_tag, decltype(std_ext::invoke(std::declval<F>(), std::declval<Args>()...))>, F, Args...> {
                     using type = decltype(std_ext::invoke(std::declval<F>(), std::declval<Args>()...));
                 };
             }
@@ -194,12 +196,14 @@ namespace kari
 
             namespace detail
             {
+                struct is_invocable_impl_tag {};
+
                 template < typename Void, typename F, typename... Args >
                 struct is_invocable_impl
                 : std::false_type {};
 
                 template < typename F, typename... Args >
-                struct is_invocable_impl<void_t<invoke_result_t<F, Args...>>, F, Args...>
+                struct is_invocable_impl<void_t<is_invocable_impl_tag, invoke_result_t<F, Args...>>, F, Args...>
                 : std::true_type {};
             }
 
@@ -242,7 +246,7 @@ namespace kari
             std::size_t N, typename F, typename... Args,
             typename std::enable_if_t<
                 (N == 0) &&
-                std_ext::is_invocable_v<F, Args...>
+                std_ext::is_invocable_v<std::decay_t<F>, Args...>
             , int> = 0
         >
         constexpr auto make_curry(F&& f, std::tuple<Args...>&& args) {
@@ -254,7 +258,7 @@ namespace kari
             std::size_t N, typename F, typename... Args,
             typename std::enable_if_t<
                 (N > 0) ||
-                !std_ext::is_invocable_v<F, Args...>
+                !std_ext::is_invocable_v<std::decay_t<F>, Args...>
             , int> = 0
         >
         constexpr decltype(auto) make_curry(F&& f, std::tuple<Args...>&& args) {
