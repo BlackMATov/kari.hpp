@@ -1,4 +1,3 @@
-build-tests-*
-tests/build/*
-tests/.vscode/*
-tests/CMakeLists.txt.user
+build/*
+.vscode/*
+CMakeLists.txt.user

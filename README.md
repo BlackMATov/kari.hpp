@@ -2,23 +2,29 @@
 
 > Experimental library for currying in C++14
 
-[![circleci][badge.circleci]][circleci]
+[![travis][badge.travis]][travis]
 [![appveyor][badge.appveyor]][appveyor]
+[![language][badge.language]][language]
 [![license][badge.license]][license]
 [![godbolt][badge.godbolt]][godbolt]
 [![wandbox][badge.wandbox]][wandbox]
+[![paypal][badge.paypal]][paypal]
 
-[badge.circleci]: https://circleci.com/gh/BlackMATov/kari.hpp.svg?style=shield
-[badge.appveyor]: https://ci.appveyor.com/api/projects/status/github/blackmatov/kari.hpp?svg=true&passingText=master%20-%20OK
-[badge.license]: https://img.shields.io/badge/license-MIT-blue.svg
-[badge.godbolt]: https://img.shields.io/badge/try%20it-on%20godbolt-orange.svg
-[badge.wandbox]: https://img.shields.io/badge/try%20it-on%20wandbox-5cb85c.svg
+[badge.travis]: https://img.shields.io/travis/BlackMATov/kari.hpp/master.svg?logo=travis&style=shield
+[badge.appveyor]: https://img.shields.io/appveyor/ci/BlackMATov/kari-hpp/master.svg?logo=appveyor&style=shield
+[badge.language]: https://img.shields.io/badge/language-C%2B%2B14-red.svg?style=shield
+[badge.license]: https://img.shields.io/badge/license-MIT-blue.svg?style=shield
+[badge.godbolt]: https://img.shields.io/badge/try%20it-on%20godbolt-orange.svg?style=shield
+[badge.wandbox]: https://img.shields.io/badge/try%20it-on%20wandbox-5cb85c.svg?style=shield
+[badge.paypal]: https://img.shields.io/badge/donate-PayPal-orange.svg?logo=paypal&colorA=00457C&style=shield
 
-[circleci]: https://circleci.com/gh/BlackMATov/kari.hpp
+[travis]: https://travis-ci.org/BlackMATov/kari.hpp
 [appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
+[language]: https://en.wikipedia.org/wiki/C%2B%2B14
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
 [wandbox]: https://wandbox.org/permlink/l6uHui1884zfQNa4
+[paypal]: https://www.paypal.me/matov
 
 [kari]: https://github.com/BlackMATov/kari.hpp
 
@@ -268,3 +274,5 @@ auto r1 = ((_+2)*_)(_*2) * 10;
 // output: 24,22
 std::cout << r0, << "," << r1 << std::endl;
 ```
+
+## [License (MIT)](./LICENSE.md)
