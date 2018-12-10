@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * This file is part of the "kari.hpp"
+ * For conditions of distribution and use, see copyright notice in LICENSE.md
+ * Copyright (C) 2018 Matvey Cherevko
+ ******************************************************************************/
+
 #pragma once
 
 #include <tuple>
@@ -666,7 +672,7 @@ namespace kari
             KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(> , std::greater<>())
             KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(<=, std::less_equal<>())
             KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(>=, std::greater_equal<>())
-            
+
             KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(==, std::equal_to<>())
             KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(!=, std::not_equal_to<>())
 

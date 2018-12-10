@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * This file is part of the "kari.hpp"
+ * For conditions of distribution and use, see copyright notice in LICENSE.md
+ * Copyright (C) 2018 Matvey Cherevko
+ ******************************************************************************/
+
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
@@ -709,11 +715,11 @@ TEST_CASE("kari_details") {
     }
     SECTION("is_invocable") {
         using namespace kari::detail;
-        
+
         const auto f1 = [](int i, int j){
             return i + j;
         };
-        
+
         const auto f2 = [](int i, int j) noexcept {
             return i + j;
         };
