@@ -23,7 +23,7 @@
 [language]: https://en.wikipedia.org/wiki/C%2B%2B14
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
 [godbolt]: https://godbolt.org/g/XPBgjY
-[wandbox]: https://wandbox.org/permlink/l6uHui1884zfQNa4
+[wandbox]: https://wandbox.org/permlink/F6AVvcCHsoBztZ0w
 [paypal]: https://www.paypal.me/matov
 
 [kari]: https://github.com/BlackMATov/kari.hpp
