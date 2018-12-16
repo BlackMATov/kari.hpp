@@ -1,10 +1,10 @@
 /*******************************************************************************
- * This file is part of the "kari.hpp"
+ * This file is part of the "https://github.com/BlackMATov/kari.hpp"
  * For conditions of distribution and use, see copyright notice in LICENSE.md
  * Copyright (C) 2018 Matvey Cherevko
  ******************************************************************************/
 
-#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_FAST_COMPILE
 #include "catch.hpp"
 
 #include "kari.hpp"
@@ -632,105 +632,6 @@ TEST_CASE("kari") {
     }
 }
 
-TEST_CASE("kari_details") {
-    SECTION("invoke") {
-        using namespace kari::detail;
-        REQUIRE(std_ext::invoke(std::minus<>(), 44, 2) == 42);
-        REQUIRE(std_ext::invoke(&box::addV, box(10), 2) == 12);
-        {
-            auto b1 = box(10);
-            const auto b2 = box(10);
-            REQUIRE(std_ext::invoke(&box::addV, b1, 2) == 12);
-            REQUIRE(std_ext::invoke(&box::v, b2) == 10);
-            REQUIRE(std_ext::invoke(&box::addV, &b1, 2) == 14);
-            REQUIRE(std_ext::invoke(&box::v, &b2) == 10);
-        }
-        {
-            auto b1 = box(10);
-            const auto b2 = box(10);
-            REQUIRE(std_ext::invoke(&box::addV, std::ref(b1), 2) == 12);
-            REQUIRE(std_ext::invoke(&box::v, std::ref(b2)) == 10);
-        }
-        {
-            struct box2 : box {
-                box2(int v) : box(v) {}
-            };
-            auto b1 = box2(10);
-            const auto b2 = box2(10);
-            REQUIRE(std_ext::invoke(&box::addV, b1, 2) == 12);
-            REQUIRE(std_ext::invoke(&box::v, b2) == 10);
-            REQUIRE(std_ext::invoke(&box::addV, &b1, 2) == 14);
-            REQUIRE(std_ext::invoke(&box::v, &b2) == 10);
-
-            REQUIRE(std_ext::invoke(&box2::addV, b1, 2) == 16);
-            REQUIRE(std_ext::invoke(&box2::v, b2) == 10);
-            REQUIRE(std_ext::invoke(&box2::addV, &b1, 2) == 18);
-            REQUIRE(std_ext::invoke(&box2::v, &b2) == 10);
-        }
-        {
-            struct box2 : box {
-                box2(int v) : box(v) {}
-            };
-            auto b1 = box2(10);
-            const auto b2 = box2(10);
-            REQUIRE(std_ext::invoke(&box::addV, std::ref(b1), 2) == 12);
-            REQUIRE(std_ext::invoke(&box::v, std::ref(b2)) == 10);
-
-            REQUIRE(std_ext::invoke(&box2::addV, std::ref(b1), 2) == 14);
-            REQUIRE(std_ext::invoke(&box2::v, std::ref(b2)) == 10);
-        }
-        {
-            struct box2 : box {
-                box2(int v) : box(v), ov(v) {}
-                int ov;
-            };
-            auto b1 = box2(10);
-            const auto b2 = box2(10);
-            REQUIRE(std_ext::invoke(&box2::ov, box2(10)) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, b1) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, b2) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, &b1) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, &b2) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, std::ref(b1)) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, std::ref(b2)) == 10);
-        }
-        {
-            struct box2 : box {
-                box2(int v) : box(v), ov(v) {}
-                int ov;
-            };
-            struct box3 : box2 {
-                box3(int v) : box2(v) {}
-            };
-            auto b1 = box3(10);
-            const auto b2 = box3(10);
-            REQUIRE(std_ext::invoke(&box2::ov, box3(10)) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, b1) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, b2) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, &b1) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, &b2) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, std::ref(b1)) == 10);
-            REQUIRE(std_ext::invoke(&box2::ov, std::ref(b2)) == 10);
-        }
-    }
-    SECTION("is_invocable") {
-        using namespace kari::detail;
-
-        const auto f1 = [](int i, int j){
-            return i + j;
-        };
-
-        const auto f2 = [](int i, int j) noexcept {
-            return i + j;
-        };
-
-        static_assert( std_ext::is_invocable_v<decltype(f1), int, int>, "static unit test error");
-        static_assert(!std_ext::is_invocable_v<decltype(f1), int, box>, "static unit test error");
-        static_assert( std_ext::is_invocable_v<decltype(f2), int, int>, "static unit test error");
-        static_assert(!std_ext::is_invocable_v<decltype(f2), int, box>, "static unit test error");
-    }
-}
-
 TEST_CASE("kari_helpers") {
     SECTION("fid") {
         REQUIRE(fid(box(10)).v() == 10);
@@ -820,7 +721,3 @@ TEST_CASE("kari_regression") {
         REQUIRE(c2(1,2,3) == 6);
     }
 }
-
-// Local Variables:
-// indent-tabs-mode: nil
-// End:
