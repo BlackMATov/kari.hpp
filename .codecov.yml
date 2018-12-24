@@ -1,0 +1,3 @@
+ignore:
+  - catch.hpp
+  - catch_main.hpp
