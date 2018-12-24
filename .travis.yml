@@ -54,6 +54,8 @@ matrix:
     - os: osx
       osx_image: xcode10
       compiler: clang
+      addons: { homebrew: { packages: ["lcov"] } }
+      after_success: ./scripts/upload_coverage.sh
 before_install:
   - eval "${MATRIX_EVAL}"
 script:
