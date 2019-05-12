@@ -7,8 +7,6 @@
 [![codecov][badge.codecov]][codecov]
 [![language][badge.language]][language]
 [![license][badge.license]][license]
-[![godbolt][badge.godbolt]][godbolt]
-[![wandbox][badge.wandbox]][wandbox]
 [![paypal][badge.paypal]][paypal]
 
 [badge.travis]: https://img.shields.io/travis/BlackMATov/kari.hpp/master.svg?logo=travis
@@ -16,8 +14,6 @@
 [badge.codecov]: https://img.shields.io/codecov/c/github/BlackMATov/kari.hpp/master.svg?logo=codecov
 [badge.language]: https://img.shields.io/badge/language-C%2B%2B14-red.svg
 [badge.license]: https://img.shields.io/badge/license-MIT-blue.svg
-[badge.godbolt]: https://img.shields.io/badge/try%20it-on%20godbolt-orange.svg
-[badge.wandbox]: https://img.shields.io/badge/try%20it-on%20wandbox-5cb85c.svg
 [badge.paypal]: https://img.shields.io/badge/donate-PayPal-orange.svg?logo=paypal&colorA=00457C
 
 [travis]: https://travis-ci.org/BlackMATov/kari.hpp
@@ -25,18 +21,24 @@
 [codecov]: https://codecov.io/gh/BlackMATov/kari.hpp
 [language]: https://en.wikipedia.org/wiki/C%2B%2B14
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
-[godbolt]: https://godbolt.org/g/XPBgjY
-[wandbox]: https://wandbox.org/permlink/F6AVvcCHsoBztZ0w
 [paypal]: https://www.paypal.me/matov
 
 [kari]: https://github.com/BlackMATov/kari.hpp
 
 ## Installation
 
-[kari.hpp][kari] is a single header library. All you need to do is copy the header file into your project and include this file:
+[kari.hpp][kari] is a header-only library. All you need to do is copy the headers files from `headers` directory into your project and include them:
+
 
 ```cpp
-#include "kari.hpp"
+#include "kari_hpp/kari.hpp"
+```
+
+Also, you can add the root repository directory to your [cmake](https://cmake.org) project:
+
+```cmake
+add_subdirectory(external/kari.hpp)
+target_link_libraries(your_project_target kari.hpp)
 ```
 
 ## Examples
