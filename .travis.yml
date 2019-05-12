@@ -3,10 +3,6 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      addons: { apt: { sources: ubuntu-toolchain-r-test, packages: ["xorg-dev", "g++-6"] } }
-      env: MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-    - os: linux
-      dist: trusty
       addons: { apt: { sources: ubuntu-toolchain-r-test, packages: ["xorg-dev", "g++-7"] } }
       env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
@@ -15,27 +11,20 @@ matrix:
       env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
     - os: linux
       dist: trusty
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-precise-3.8"], packages: ["xorg-dev", "clang-3.8", "g++-5"] } }
-      env: MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
-    - os: linux
-      dist: trusty
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-precise-3.9"], packages: ["xorg-dev", "clang-3.9", "g++-5"] } }
-      env: MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
-    - os: linux
-      dist: trusty
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-4.0"], packages: ["xorg-dev", "clang-4.0", "g++-5"] } }
-      env: MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-    - os: linux
-      dist: trusty
       addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-5.0"], packages: ["xorg-dev", "clang-5.0", "g++-7"] } }
       env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
     - os: linux
       dist: trusty
       addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-6.0"], packages: ["xorg-dev", "clang-6.0", "g++-7"] } }
       env: MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
-    - os: osx
-      osx_image: xcode8.3
-      compiler: clang
+    - os: linux
+      dist: trusty
+      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-7"], packages: ["xorg-dev", "clang-7", "g++-7"] } }
+      env: MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+    - os: linux
+      dist: trusty
+      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-8"], packages: ["xorg-dev", "clang-8", "g++-7"] } }
+      env: MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
     - os: osx
       osx_image: xcode9
       compiler: clang
@@ -58,5 +47,16 @@ matrix:
       after_success: ./scripts/upload_coverage.sh
 before_install:
   - eval "${MATRIX_EVAL}"
+  - if [ "$TRAVIS_OS_NAME" == 'osx' ]; then
+    brew update;
+    brew upgrade cmake;
+    brew install git-lfs;
+    fi
+  - if [ "$TRAVIS_OS_NAME" == 'linux' ]; then
+    mkdir $HOME/cmake;
+    export PATH="$HOME/cmake/bin:$PATH";
+    travis_retry wget -q https://cmake.org/files/v3.11/cmake-3.11.4-Linux-x86_64.sh;
+    sh cmake-3.11.4-Linux-x86_64.sh --prefix=$HOME/cmake --exclude-subdir --skip-license;
+    fi
 script:
   - ./scripts/build_all.sh
