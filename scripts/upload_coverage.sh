@@ -4,7 +4,7 @@ set -e
 BUILD_DIR=`dirname "$BASH_SOURCE"`/../build
 mkdir -p $BUILD_DIR/coverage
 cd $BUILD_DIR/coverage
-cmake -DCMAKE_BUILD_TYPE=Debug -DKARI_BUILD_WITH_COVERAGE=ON ../..
+cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_WITH_COVERAGE=ON ../..
 cmake --build . -- -j8
 
 lcov -d . -z

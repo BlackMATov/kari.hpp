@@ -1,42 +1,44 @@
-# kari.hpp [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Experimental%20library%20for%20currying%20in%20C%2B%2B14&url=https://github.com/BlackMATov/kari.hpp&via=BMEngine&hashtags=cpp,currying,cpp14,cpp17,functionalprogramming)
+# kari.hpp [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Experimental%20library%20for%20currying%20in%20C%2B%2B17&url=https://github.com/BlackMATov/kari.hpp&via=BMEngine&hashtags=cpp,currying,cpp17,functionalprogramming)
 
-> Experimental library for currying in C++14
+> Experimental library for currying in C++17
 
 [![travis][badge.travis]][travis]
 [![appveyor][badge.appveyor]][appveyor]
 [![codecov][badge.codecov]][codecov]
 [![language][badge.language]][language]
 [![license][badge.license]][license]
-[![godbolt][badge.godbolt]][godbolt]
-[![wandbox][badge.wandbox]][wandbox]
 [![paypal][badge.paypal]][paypal]
 
 [badge.travis]: https://img.shields.io/travis/BlackMATov/kari.hpp/master.svg?logo=travis
 [badge.appveyor]: https://img.shields.io/appveyor/ci/BlackMATov/kari-hpp/master.svg?logo=appveyor
 [badge.codecov]: https://img.shields.io/codecov/c/github/BlackMATov/kari.hpp/master.svg?logo=codecov
-[badge.language]: https://img.shields.io/badge/language-C%2B%2B14-red.svg
+[badge.language]: https://img.shields.io/badge/language-C%2B%2B17-yellow.svg
 [badge.license]: https://img.shields.io/badge/license-MIT-blue.svg
-[badge.godbolt]: https://img.shields.io/badge/try%20it-on%20godbolt-orange.svg
-[badge.wandbox]: https://img.shields.io/badge/try%20it-on%20wandbox-5cb85c.svg
 [badge.paypal]: https://img.shields.io/badge/donate-PayPal-orange.svg?logo=paypal&colorA=00457C
 
 [travis]: https://travis-ci.org/BlackMATov/kari.hpp
 [appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
 [codecov]: https://codecov.io/gh/BlackMATov/kari.hpp
-[language]: https://en.wikipedia.org/wiki/C%2B%2B14
+[language]: https://en.wikipedia.org/wiki/C%2B%2B17
 [license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
-[godbolt]: https://godbolt.org/g/XPBgjY
-[wandbox]: https://wandbox.org/permlink/F6AVvcCHsoBztZ0w
 [paypal]: https://www.paypal.me/matov
 
 [kari]: https://github.com/BlackMATov/kari.hpp
 
 ## Installation
 
-[kari.hpp][kari] is a single header library. All you need to do is copy the header file into your project and include this file:
+[kari.hpp][kari] is a header-only library. All you need to do is copy the headers files from `headers` directory into your project and include them:
+
 
 ```cpp
-#include "kari.hpp"
+#include "kari_hpp/kari.hpp"
+```
+
+Also, you can add the root repository directory to your [cmake](https://cmake.org) project:
+
+```cmake
+add_subdirectory(external/kari.hpp)
+target_link_libraries(your_project_target kari.hpp)
 ```
 
 ## Examples
@@ -129,7 +131,7 @@ namespace kari {
   struct is_curried;
 
   template < typename F >
-  constexpr bool is_curried_v = is_curried<F>::value;
+  inline constexpr bool is_curried_v = is_curried<F>::value;
 
   template < std::size_t N, typename F, typename... Args >
   struct curry_t {
