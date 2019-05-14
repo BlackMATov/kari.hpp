@@ -7,7 +7,7 @@
 #define CATCH_CONFIG_FAST_COMPILE
 #include <catch2/catch.hpp>
 
-#include <kari_hpp/kari.hpp>
+#include <kari.hpp/kari.hpp>
 
 #include <cstdio>
 #include <cstring>
