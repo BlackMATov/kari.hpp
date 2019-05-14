@@ -31,7 +31,7 @@
 
 
 ```cpp
-#include "kari_hpp/kari.hpp"
+#include "kari.hpp/kari.hpp"
 ```
 
 Also, you can add the root repository directory to your [cmake](https://cmake.org) project:
