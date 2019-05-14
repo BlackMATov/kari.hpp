@@ -95,8 +95,6 @@ namespace
                 std::forward<Cs>(cs)...);
         }
     };
-
-    constexpr auto f = kari::curry(minus2_gf{}, 10, 20);
 }
 
 namespace
@@ -193,10 +191,6 @@ namespace
 
     static box_without_move operator+(const box_without_move& lhs, const box_without_move& rhs) {
         return box_without_move(lhs.v() + rhs.v());
-    }
-
-    static box_without_move operator-(const box_without_move& lhs, const box_without_move& rhs) {
-        return box_without_move(lhs.v() - rhs.v());
     }
 }
 
