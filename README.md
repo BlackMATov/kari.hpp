@@ -1,4 +1,4 @@
-# kari.hpp [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Experimental%20library%20for%20currying%20in%20C%2B%2B17&url=https://github.com/BlackMATov/kari.hpp&via=BMEngine&hashtags=cpp,currying,cpp17,functionalprogramming)
+# kari.hpp
 
 > Experimental library for currying in C++17
 
@@ -9,9 +9,9 @@
 [![license][badge.license]][license]
 [![paypal][badge.paypal]][paypal]
 
-[badge.travis]: https://img.shields.io/travis/BlackMATov/kari.hpp/master.svg?logo=travis
-[badge.appveyor]: https://img.shields.io/appveyor/ci/BlackMATov/kari-hpp/master.svg?logo=appveyor
-[badge.codecov]: https://img.shields.io/codecov/c/github/BlackMATov/kari.hpp/master.svg?logo=codecov
+[badge.travis]: https://img.shields.io/travis/BlackMATov/kari.hpp/main.svg?logo=travis
+[badge.appveyor]: https://img.shields.io/appveyor/ci/BlackMATov/kari-hpp/main.svg?logo=appveyor
+[badge.codecov]: https://img.shields.io/codecov/c/github/BlackMATov/kari.hpp/main.svg?logo=codecov
 [badge.language]: https://img.shields.io/badge/language-C%2B%2B17-yellow.svg
 [badge.license]: https://img.shields.io/badge/license-MIT-blue.svg
 [badge.paypal]: https://img.shields.io/badge/donate-PayPal-orange.svg?logo=paypal&colorA=00457C
@@ -20,10 +20,16 @@
 [appveyor]: https://ci.appveyor.com/project/BlackMATov/kari-hpp
 [codecov]: https://codecov.io/gh/BlackMATov/kari.hpp
 [language]: https://en.wikipedia.org/wiki/C%2B%2B17
-[license]: https://github.com/BlackMATov/kari.hpp/blob/master/LICENSE.md
+[license]: https://en.wikipedia.org/wiki/MIT_License
 [paypal]: https://www.paypal.me/matov
 
 [kari]: https://github.com/BlackMATov/kari.hpp
+
+## Requirements
+
+- [gcc](https://www.gnu.org/software/gcc/) **>= 7**
+- [clang](https://clang.llvm.org/) **>= 5.0**
+- [msvc](https://visualstudio.microsoft.com/) **>= 2017**
 
 ## Installation
 
