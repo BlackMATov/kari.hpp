@@ -1,13 +1,11 @@
 /*******************************************************************************
  * This file is part of the "https://github.com/BlackMATov/kari.hpp"
  * For conditions of distribution and use, see copyright notice in LICENSE.md
- * Copyright (C) 2017-2019, by Matvey Cherevko (blackmatov@gmail.com)
+ * Copyright (C) 2017-2020, by Matvey Cherevko (blackmatov@gmail.com)
  ******************************************************************************/
 
-#define CATCH_CONFIG_FAST_COMPILE
-#include <catch2/catch.hpp>
-
 #include <kari.hpp/kari.hpp>
+#include "doctest/doctest.hpp"
 
 #include <cstdio>
 #include <cstring>
@@ -197,7 +195,7 @@ namespace
 using namespace kari;
 
 TEST_CASE("kari_feature") {
-    SECTION("underscore") {
+    SUBCASE("underscore") {
         using namespace kari::underscore;
         REQUIRE((-_)(40) == -40);
 
@@ -234,7 +232,7 @@ TEST_CASE("kari_feature") {
         REQUIRE_FALSE((_ == _)(42,40));
         REQUIRE_FALSE((_ != _)(42,42));
     }
-    SECTION("ref_functor") {
+    SUBCASE("ref_functor") {
         REQUIRE(curry(minus3_gf())(1,2,3) == -4);
         {
             auto gf1 = id_gf();
@@ -253,7 +251,7 @@ TEST_CASE("kari_feature") {
             REQUIRE(curry(gf3)(1,2,3) == -4);
         }
     }
-    SECTION("ref_forwarding") {
+    SUBCASE("ref_forwarding") {
         {
             int i = 42;
             const int& g = curry([](const int& v, int){
@@ -269,7 +267,7 @@ TEST_CASE("kari_feature") {
             REQUIRE(&i == &g);
         }
     }
-    SECTION("move_vs_copy") {
+    SUBCASE("move_vs_copy") {
         {
             box::resetCounters();
             const auto b1 = box(1);
@@ -366,7 +364,7 @@ TEST_CASE("kari_feature") {
             REQUIRE(box::copyCount() == 15);
         }
     }
-    SECTION("persistent") {
+    SUBCASE("persistent") {
         auto c        = curry(minus3_gl);
 
         auto c10      = c(box(10));
@@ -392,14 +390,14 @@ TEST_CASE("kari_feature") {
 }
 
 TEST_CASE("kari") {
-    SECTION("arity/min_arity") {
+    SUBCASE("arity/min_arity") {
         REQUIRE(curry(minus3_gl).min_arity() == 0);
         REQUIRE(curryV(plusV_gf()).min_arity() == std::numeric_limits<std::size_t>::max());
         REQUIRE(curryN<3>(plusV_gf()).min_arity() == 3);
         REQUIRE(curryN<3>(plusV_gf())(1).min_arity() == 2);
         REQUIRE(curryN<3>(plusV_gf())(1)(2).min_arity() == 1);
     }
-    SECTION("arity/recurring") {
+    SUBCASE("arity/recurring") {
         constexpr auto max_size_t = std::numeric_limits<std::size_t>::max();
         {
             REQUIRE(curry(curry(minus3_gl)).min_arity() == 0);
@@ -417,7 +415,7 @@ TEST_CASE("kari") {
             REQUIRE(curryN<2>(curryN<3>(plusV_gf())).min_arity() == 2);
         }
     }
-    SECTION("is_curried") {
+    SUBCASE("is_curried") {
         static_assert(!is_curried_v<void(int)>, "static unit test error");
         static_assert(!is_curried_v<decltype(minus2_gl)>, "static unit test error");
         static_assert(is_curried_v<decltype(curry(minus2_gl))>, "static unit test error");
@@ -436,18 +434,18 @@ TEST_CASE("kari") {
 
         REQUIRE(c10_2_3.v() == 5);
     }
-    SECTION("typed_lambdas/simple") {
+    SUBCASE("typed_lambdas/simple") {
         REQUIRE(curry(_42_tl) == 42);
         REQUIRE(curry(id_tl)(42) == 42);
         REQUIRE(curry(minus2_tl)(8,4) == 4);
         REQUIRE(curry(minus3_tl)(8,5,2) == 1);
     }
-    SECTION("typed_lambdas/one_by_one_calling") {
+    SUBCASE("typed_lambdas/one_by_one_calling") {
         REQUIRE(curry(id_tl)(42) == 42);
         REQUIRE(curry(minus2_tl)(8)(4) == 4);
         REQUIRE(curry(minus3_tl)(8)(5)(2) == 1);
     }
-    SECTION("typed_lambdas/combined_calling") {
+    SUBCASE("typed_lambdas/combined_calling") {
         REQUIRE(curry(minus3_tl)(8,5)(2) == 1);
         REQUIRE(curry(minus3_tl)(8)(5,2) == 1);
 
@@ -458,17 +456,17 @@ TEST_CASE("kari") {
         REQUIRE(curry(minus4_tl)(14,2,3)(4) == 5);
         REQUIRE(curry(minus4_tl)(14)(2,3,4) == 5);
     }
-    SECTION("generic_lambdas/simple") {
+    SUBCASE("generic_lambdas/simple") {
         REQUIRE(curry(id_gl)(42) == 42);
         REQUIRE(curry(minus2_gl)(8,4) == 4);
         REQUIRE(curry(minus3_gl)(8,5,2) == 1);
     }
-    SECTION("generic_lambdas/one_by_one_calling") {
+    SUBCASE("generic_lambdas/one_by_one_calling") {
         REQUIRE(curry(id_gl)(42) == 42);
         REQUIRE(curry(minus2_gl)(8)(4) == 4);
         REQUIRE(curry(minus3_gl)(8)(5)(2) == 1);
     }
-    SECTION("generic_lambdas/combined_calling") {
+    SUBCASE("generic_lambdas/combined_calling") {
         REQUIRE(curry(minus3_gl)(8,5)(2) == 1);
         REQUIRE(curry(minus3_gl)(8)(5,2) == 1);
 
@@ -479,7 +477,7 @@ TEST_CASE("kari") {
         REQUIRE(curry(minus4_gl)(14,2,3)(4) == 5);
         REQUIRE(curry(minus4_gl)(14)(2,3,4) == 5);
     }
-    SECTION("nested_lambdas/full_apply") {
+    SUBCASE("nested_lambdas/full_apply") {
         {
             REQUIRE(curry([](){
                 return _42_tl;
@@ -524,7 +522,7 @@ TEST_CASE("kari") {
             })(9)(4,3) == 2);
         }
     }
-    SECTION("variadic_functions") {
+    SUBCASE("variadic_functions") {
         {
             const auto c = curry(plusV_gf());
             REQUIRE(c(15) == 15);
@@ -553,7 +551,7 @@ TEST_CASE("kari") {
             REQUIRE(std::strcmp("37 + 5 = 42", buffer) == 0);
         }
     }
-    SECTION("variadic_functions/recurring") {
+    SUBCASE("variadic_functions/recurring") {
         {
             auto c0 = curry(curry(plusV_gf()));
             auto c1 = curry(curryV(plusV_gf()));
@@ -586,7 +584,7 @@ TEST_CASE("kari") {
             REQUIRE(c1(40,2) == 42);
         }
     }
-    SECTION("member_functions") {
+    SUBCASE("member_functions") {
         {
             auto c0 = curry(&box::addV);
             auto c1 = curry(&box::v);
@@ -610,7 +608,7 @@ TEST_CASE("kari") {
             REQUIRE(c1(&b2) == 10);
         }
     }
-    SECTION("member_objects") {
+    SUBCASE("member_objects") {
         struct box2 : box {
             box2(int v) : box(v), ov(v) {}
             int ov;
@@ -627,10 +625,10 @@ TEST_CASE("kari") {
 }
 
 TEST_CASE("kari_helpers") {
-    SECTION("fid") {
+    SUBCASE("fid") {
         REQUIRE(fid(box(10)).v() == 10);
     }
-    SECTION("fconst") {
+    SUBCASE("fconst") {
         REQUIRE(fconst(box(10), 20).v() == 10);
         {
             auto b10 = fconst(box(10));
@@ -639,17 +637,17 @@ TEST_CASE("kari_helpers") {
             REQUIRE(b10(20).v() == 100500);
         }
     }
-    SECTION("fflip") {
+    SUBCASE("fflip") {
         REQUIRE(fflip(curry(std::minus<>()))(10, 20) == 10);
         REQUIRE(fflip(minus3_gl)(10,20,50) == -40);
     }
-    SECTION("fpipe") {
+    SUBCASE("fpipe") {
         using namespace kari::underscore;
         REQUIRE(fpipe(_+2, _*2, 4) == 12);
         REQUIRE(((_+2) | (_*2) | 4) == 12);
         REQUIRE((4 | (_+2) | (_*2)) == 12);
     }
-    SECTION("fcompose") {
+    SUBCASE("fcompose") {
         using namespace kari::underscore;
         REQUIRE(fcompose(_+2, _*2, 4) == 10);
         REQUIRE((_+2) * (_*2) * 4 == 10);
@@ -695,7 +693,7 @@ namespace kari_regression {
 }
 
 TEST_CASE("kari_regression") {
-    SECTION("change_type_after_applying") {
+    SUBCASE("change_type_after_applying") {
         using namespace kari_regression::change_type_after_applying;
         const auto f3 = [](int& v1, int v2, int v3){
             return v1 + v2 + v3;
@@ -709,7 +707,7 @@ TEST_CASE("kari_regression") {
             typename first_type<decltype(c2)>::type
         >::value,"static unit test error");
     }
-    SECTION("curryN_already_curried_function") {
+    SUBCASE("curryN_already_curried_function") {
         auto c = curryN<3>(plusV_gf());
         auto c2 = curryN<3>(c);
         REQUIRE(c2(1,2,3) == 6);
