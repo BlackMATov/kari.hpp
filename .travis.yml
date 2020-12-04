@@ -1,31 +1,11 @@
+git:
+  depth: false
+  quiet: true
+
 language: cpp
 
-matrix:
+jobs:
   include:
-
-    #
-    # windows (MSVC 2017)
-    #
-
-    - os: windows
-      stage: windows
-      name: debug, MSVC 2017, x86
-      script: ./scripts/build_debug_x86.bat
-
-    - os: windows
-      stage: windows
-      name: release, MSVC 2017, x86
-      script: ./scripts/build_release_x86.bat
-
-    - os: windows
-      stage: windows
-      name: debug, MSVC 2017, x64
-      script: ./scripts/build_debug_x64.bat
-
-    - os: windows
-      stage: windows
-      name: release, MSVC 2017, x64
-      script: ./scripts/build_release_x64.bat
 
     #
     # linux (g++-7)
@@ -75,7 +55,7 @@ matrix:
       dist: xenial
       stage: linux
       name: debug, clang++-5.0
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-xenial-5.0"], packages: ["g++-7", "clang-5.0"] } }
+      addons: { apt: { sources: ["ubuntu-toolchain-r-test"], packages: ["g++-7", "clang-5.0"] } }
       env: CC=clang-5.0 CXX=clang++-5.0
       script: ./scripts/build_debug.sh
 
@@ -83,7 +63,7 @@ matrix:
       dist: xenial
       stage: linux
       name: release, clang++-5.0
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-xenial-5.0"], packages: ["g++-7", "clang-5.0"] } }
+      addons: { apt: { sources: ["ubuntu-toolchain-r-test"], packages: ["g++-7", "clang-5.0"] } }
       env: CC=clang-5.0 CXX=clang++-5.0
       script: ./scripts/build_release.sh
 
@@ -95,7 +75,7 @@ matrix:
       dist: xenial
       stage: linux
       name: debug, clang++-6.0
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-xenial-6.0"], packages: ["g++-7", "clang-6.0"] } }
+      addons: { apt: { sources: ["ubuntu-toolchain-r-test"], packages: ["g++-7", "clang-6.0"] } }
       env: CC=clang-6.0 CXX=clang++-6.0
       script: ./scripts/build_debug.sh
 
@@ -103,7 +83,7 @@ matrix:
       dist: xenial
       stage: linux
       name: release, clang++-6.0
-      addons: { apt: { sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-xenial-6.0"], packages: ["g++-7", "clang-6.0"] } }
+      addons: { apt: { sources: ["ubuntu-toolchain-r-test"], packages: ["g++-7", "clang-6.0"] } }
       env: CC=clang-6.0 CXX=clang++-6.0
       script: ./scripts/build_release.sh
 
@@ -149,11 +129,3 @@ matrix:
       name: coverage, xcode10
       addons: { homebrew: { packages: ["lcov"], update: true } }
       script: ./scripts/upload_coverage.sh
-
-before_install:
-  - if [ "$TRAVIS_OS_NAME" == 'linux' ]; then
-    mkdir $HOME/cmake;
-    export PATH="$HOME/cmake/bin:$PATH";
-    travis_retry wget -q https://cmake.org/files/v3.11/cmake-3.11.4-Linux-x86_64.sh;
-    sh cmake-3.11.4-Linux-x86_64.sh --prefix=$HOME/cmake --exclude-subdir --skip-license;
-    fi

@@ -1,4 +1,0 @@
-ignore:
-  - "catch.hpp"
-  - "catch_main.hpp"
-  - "*_tests.cpp"
