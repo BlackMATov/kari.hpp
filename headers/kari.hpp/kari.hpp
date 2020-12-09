@@ -17,20 +17,13 @@ namespace kari_hpp
 
     namespace detail
     {
-        template < std::size_t N, typename F, typename... Args
-                 , std::enable_if_t<
-                    (N == 0) &&
-                    std::is_invocable_v<std::decay_t<F>, Args...>, int> = 0 >
+        template < std::size_t N, typename F, typename... Args >
         constexpr auto make_curry(F&& f, std::tuple<Args...>&& args) {
-            return std::apply(std::forward<F>(f), std::move(args));
-        }
-
-        template < std::size_t N, typename F, typename... Args
-                 , std::enable_if_t<
-                    (N > 0) ||
-                    !std::is_invocable_v<std::decay_t<F>, Args...>, int> = 0 >
-        constexpr auto make_curry(F&& f, std::tuple<Args...>&& args) {
-            return curry_t<N, std::decay_t<F>, Args...>(std::forward<F>(f), std::move(args));
+            if constexpr ( !N && std::is_invocable_v<std::decay_t<F>, Args...> ) {
+                return std::apply(std::forward<F>(f), std::move(args));
+            } else {
+                return curry_t<N, std::decay_t<F>, Args...>(std::forward<F>(f), std::move(args));
+            }
         }
 
         template < std::size_t N, typename F >
@@ -146,16 +139,13 @@ namespace kari_hpp
     // curry
     //
 
-    template < typename F
-             , std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0 >
+    template < typename F >
     constexpr auto curry(F&& f) {
-        return std::forward<F>(f);
-    }
-
-    template < typename F
-             , std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0 >
-    constexpr auto curry(F&& f) {
-        return detail::make_curry<0>(std::forward<F>(f));
+        if constexpr ( is_curried_v<std::decay_t<F>> ) {
+            return std::forward<F>(f);
+        } else {
+            return detail::make_curry<0>(std::forward<F>(f));
+        }
     }
 
     template < typename F, typename A, typename... As >
@@ -167,18 +157,14 @@ namespace kari_hpp
     // curryV
     //
 
-    template < typename F
-             , std::size_t MaxN = std::numeric_limits<std::size_t>::max()
-             , std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0 >
+    template < typename F >
     constexpr auto curryV(F&& f) {
-        return std::forward<F>(f).template recurry<MaxN>();
-    }
-
-    template < typename F
-             , std::size_t MaxN = std::numeric_limits<std::size_t>::max()
-             , std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0 >
-    constexpr auto curryV(F&& f) {
-        return detail::make_curry<MaxN>(std::forward<F>(f));
+        constexpr std::size_t max_n = std::size_t(-1);
+        if constexpr ( is_curried_v<std::decay_t<F>> ) {
+            return std::forward<F>(f).template recurry<max_n>();
+        } else {
+            return detail::make_curry<max_n>(std::forward<F>(f));
+        }
     }
 
     template < typename F, typename A, typename... As >
@@ -190,23 +176,20 @@ namespace kari_hpp
     // curryN
     //
 
-    template < std::size_t N, typename F
-             , std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0 >
+    template < std::size_t N, typename F >
     constexpr auto curryN(F&& f) {
-        return std::forward<F>(f).template recurry<N>();
+        if constexpr ( is_curried_v<std::decay_t<F>> ) {
+            return std::forward<F>(f).template recurry<N>();
+        } else {
+            return detail::make_curry<N>(std::forward<F>(f));
+        }
     }
 
-    template < std::size_t N, typename F
-             , std::enable_if_t<!is_curried_v<std::decay_t<F>>, int> = 0 >
-    constexpr auto curryN(F&& f) {
-        return detail::make_curry<N>(std::forward<F>(f));
-    }
-
-    template < std::size_t N, typename F, typename A, typename... As
-             , std::size_t Args = sizeof...(As) + 1
-             , std::size_t MaxN = std::numeric_limits<std::size_t>::max()
-             , std::enable_if_t<(MaxN - Args >= N), int> = 0 >
+    template < std::size_t N, typename F, typename A, typename... As >
     constexpr auto curryN(F&& f, A&& a, As&&... as) {
-        return curryN<N + Args>(std::forward<F>(f))(std::forward<A>(a), std::forward<As>(as)...);
+        constexpr std::size_t max_n = std::size_t(-1);
+        constexpr std::size_t arg_n = sizeof...(As) + 1;
+        static_assert(max_n - arg_n >= N, "invalid N argument");
+        return curryN<N + arg_n>(std::forward<F>(f))(std::forward<A>(a), std::forward<As>(as)...);
     }
 }
