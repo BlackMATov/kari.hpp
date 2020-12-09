@@ -32,7 +32,7 @@ namespace kari_hpp
 
     struct fconst_t {
         template < typename A, typename B >
-        constexpr auto operator()(A&& a, B&&) const {
+        constexpr auto operator()(A&& a, [[maybe_unused]] B&& b) const {
             return std::forward<A>(a);
         }
     };
@@ -45,10 +45,7 @@ namespace kari_hpp
     struct fflip_t {
         template < typename F, typename A, typename B >
         constexpr auto operator()(F&& f, A&& a, B&& b) const {
-            return curry(
-                std::forward<F>(f),
-                std::forward<B>(b),
-                std::forward<A>(a));
+            return curry(std::forward<F>(f), std::forward<B>(b), std::forward<A>(a));
         }
     };
     inline constexpr auto fflip = curry(fflip_t{});
@@ -62,9 +59,7 @@ namespace kari_hpp
         constexpr auto operator()(G&& g, F&& f, A&& a) const {
             return curry(
                 std::forward<F>(f),
-                curry(
-                    std::forward<G>(g),
-                    std::forward<A>(a)));
+                curry(std::forward<G>(g), std::forward<A>(a)));
         }
     };
     inline constexpr auto fpipe = curry(fpipe_t{});
@@ -78,9 +73,7 @@ namespace kari_hpp
         constexpr auto operator()(G&& g, F&& f, A&& a) const {
             return curry(
                 std::forward<G>(g),
-                curry(
-                    std::forward<F>(f),
-                    std::forward<A>(a)));
+                curry(std::forward<F>(f), std::forward<A>(a)));
         }
     };
     inline constexpr auto fcompose = curry(fcompose_t{});
@@ -90,26 +83,26 @@ namespace kari_hpp
     //
 
     template < typename G, typename F
-             , std::enable_if_t<is_curried_v<std::decay_t<G>>, int> = 0
-             , std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0 >
+             , std::enable_if_t<std::disjunction_v<
+                is_curried<std::decay_t<G>>,
+                is_curried<std::decay_t<F>>>, int> = 0 >
     constexpr auto operator|(G&& g, F&& f) {
-        return fpipe(
-            std::forward<G>(g),
-            std::forward<F>(f));
-    }
+        constexpr bool gc = is_curried_v<std::decay_t<G>>;
+        constexpr bool fc = is_curried_v<std::decay_t<F>>;
 
-    template < typename F, typename A
-             , std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0
-             , std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0 >
-    constexpr auto operator|(F&& f, A&& a) {
-        return std::forward<F>(f)(std::forward<A>(a));
-    }
+        if constexpr ( gc && fc ) {
+            return fpipe(std::forward<G>(g), std::forward<F>(f));
+        }
 
-    template < typename A, typename F
-             , std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0
-             , std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0 >
-    constexpr auto operator|(A&& a, F&& f) {
-        return std::forward<F>(f)(std::forward<A>(a));
+        if constexpr ( gc && !fc) {
+            return std::forward<G>(g)(std::forward<F>(f));
+        }
+
+        if constexpr ( !gc && fc) {
+            return std::forward<F>(f)(std::forward<G>(g));
+        }
+
+        static_assert(gc || fc, "F or G or both arguments should be curried");
     }
 
     //
@@ -117,26 +110,26 @@ namespace kari_hpp
     //
 
     template < typename G, typename F
-             , std::enable_if_t<is_curried_v<std::decay_t<G>>, int> = 0
-             , std::enable_if_t<is_curried_v<std::decay_t<F>>, int> = 0 >
+             , std::enable_if_t<std::disjunction_v<
+                is_curried<std::decay_t<G>>,
+                is_curried<std::decay_t<F>>>, int> = 0 >
     constexpr auto operator*(G&& g, F&& f) {
-        return fcompose(
-            std::forward<G>(g),
-            std::forward<F>(f));
-    }
+        constexpr bool gc = is_curried_v<std::decay_t<G>>;
+        constexpr bool fc = is_curried_v<std::decay_t<F>>;
 
-    template < typename F, typename A
-             , std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0
-             , std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0 >
-    constexpr auto operator*(F&& f, A&& a) {
-        return std::forward<F>(f)(std::forward<A>(a));
-    }
+        if constexpr ( gc && fc ) {
+            return fcompose(std::forward<G>(g), std::forward<F>(f));
+        }
 
-    template < typename A, typename F
-             , std::enable_if_t<!is_curried_v<std::decay_t<A>>, int> = 0
-             , std::enable_if_t< is_curried_v<std::decay_t<F>>, int> = 0 >
-    constexpr auto operator*(A&& a, F&& f) {
-        return std::forward<F>(f)(std::forward<A>(a));
+        if constexpr ( gc && !fc) {
+            return std::forward<G>(g)(std::forward<F>(f));
+        }
+
+        if constexpr ( !gc && fc) {
+            return std::forward<F>(f)(std::forward<G>(g));
+        }
+
+        static_assert(gc || fc, "F or G or both arguments should be curried");
     }
 }
 
