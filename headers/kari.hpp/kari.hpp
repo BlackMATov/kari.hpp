@@ -18,7 +18,7 @@
 #define KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(...) \
     noexcept(noexcept(__VA_ARGS__)) -> decltype (__VA_ARGS__) { return __VA_ARGS__; }
 
-namespace kari
+namespace kari_hpp
 {
     template < std::size_t N, typename F, typename... Args >
     struct curry_t;

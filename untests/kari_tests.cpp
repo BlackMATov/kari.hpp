@@ -192,7 +192,7 @@ namespace
     }
 }
 
-using namespace kari;
+using namespace kari_hpp;
 
 TEST_CASE("kari_feature") {
     SUBCASE("ref_functor") {
@@ -503,13 +503,13 @@ TEST_CASE("kari") {
         }
         {
             char buffer[256] = {'\0'};
-            auto c = kari::curryV(std::snprintf, buffer, 256, "%d + %d = %d");
+            auto c = curryV(std::snprintf, buffer, 256, "%d + %d = %d");
             c(37, 5, 42)();
             REQUIRE(std::strcmp("37 + 5 = 42", buffer) == 0);
         }
         {
             char buffer[256] = {'\0'};
-            auto c = kari::curryN<3>(std::snprintf, buffer, 256, "%d + %d = %d");
+            auto c = curryN<3>(std::snprintf, buffer, 256, "%d + %d = %d");
             c(37, 5, 42);
             REQUIRE(std::strcmp("37 + 5 = 42", buffer) == 0);
         }

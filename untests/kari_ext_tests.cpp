@@ -7,11 +7,11 @@
 #include <kari.hpp/kari_ext.hpp>
 #include "doctest/doctest.hpp"
 
-using namespace kari;
+using namespace kari_hpp;
 
 TEST_CASE("kari_feature") {
     SUBCASE("underscore") {
-        using namespace kari::underscore;
+        using namespace underscore;
         REQUIRE((-_)(40) == -40);
 
         REQUIRE((_ + 40)(2) == 42);

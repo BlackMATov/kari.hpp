@@ -14,7 +14,7 @@
 #define KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(...) \
     noexcept(noexcept(__VA_ARGS__)) -> decltype (__VA_ARGS__) { return __VA_ARGS__; }
 
-namespace kari
+namespace kari_hpp
 {
     //
     // fid
@@ -160,74 +160,71 @@ namespace kari
         std::forward<F>(f)(std::forward<A>(a)))
 }
 
-namespace kari
+namespace kari_hpp::underscore
 {
-    namespace underscore
-    {
-        struct us_t {};
-        inline constexpr us_t _{};
+    struct us_t {};
+    inline constexpr us_t _{};
 
-        //
-        // is_underscore, is_underscore_v
-        //
+    //
+    // is_underscore, is_underscore_v
+    //
 
-        template < typename T >
-        struct is_underscore
-        : std::bool_constant<std::is_same_v<us_t, std::remove_cv_t<T>>> {};
+    template < typename T >
+    struct is_underscore
+    : std::bool_constant<std::is_same_v<us_t, std::remove_cv_t<T>>> {};
 
-        template < typename T >
-        inline constexpr bool is_underscore_v = is_underscore<T>::value;
+    template < typename T >
+    inline constexpr bool is_underscore_v = is_underscore<T>::value;
 
-        //
-        // unary operators
-        //
+    //
+    // unary operators
+    //
 
-        #define KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(op, func) \
-            constexpr auto operator op (us_t) KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func))
+    #define KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(op, func) \
+        constexpr auto operator op (us_t) KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func))
 
-            KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(-, std::negate<>())
-            KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(~, std::bit_not<>())
-            KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(!, std::logical_not<>())
-        #undef KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP
+        KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(-, std::negate<>())
+        KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(~, std::bit_not<>())
+        KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP(!, std::logical_not<>())
+    #undef KARI_HPP_DEFINE_UNDERSCORE_UNARY_OP
 
-        //
-        // binary operators
-        //
+    //
+    // binary operators
+    //
 
-        #define KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(op, func) \
-            constexpr auto operator op (us_t, us_t) \
-            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func)) \
-            \
-            template < typename A, typename std::enable_if_t<!is_underscore_v<std::decay_t<A>>, int> = 0 > \
-            constexpr auto operator op (A&& a, us_t) \
-            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func, std::forward<A>(a))) \
-            \
-            template < typename B, typename std::enable_if_t<!is_underscore_v<std::decay_t<B>>, int> = 0 > \
-            constexpr auto operator op (us_t, B&& b) \
-            KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(fflip(func, std::forward<B>(b)))
+    #define KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(op, func) \
+        constexpr auto operator op (us_t, us_t) \
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func)) \
+        \
+        template < typename A, typename std::enable_if_t<!is_underscore_v<std::decay_t<A>>, int> = 0 > \
+        constexpr auto operator op (A&& a, us_t) \
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(curry(func, std::forward<A>(a))) \
+        \
+        template < typename B, typename std::enable_if_t<!is_underscore_v<std::decay_t<B>>, int> = 0 > \
+        constexpr auto operator op (us_t, B&& b) \
+        KARI_HPP_NOEXCEPT_DECLTYPE_RETURN(fflip(func, std::forward<B>(b)))
 
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(+ , std::plus<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(- , std::minus<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(* , std::multiplies<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(/ , std::divides<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(% , std::modulus<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(+ , std::plus<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(- , std::minus<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(* , std::multiplies<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(/ , std::divides<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(% , std::modulus<>())
 
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(< , std::less<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(> , std::greater<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(<=, std::less_equal<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(>=, std::greater_equal<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(< , std::less<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(> , std::greater<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(<=, std::less_equal<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(>=, std::greater_equal<>())
 
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(==, std::equal_to<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(!=, std::not_equal_to<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(==, std::equal_to<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(!=, std::not_equal_to<>())
 
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(| , std::bit_or<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(& , std::bit_and<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(^ , std::bit_xor<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(| , std::bit_or<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(& , std::bit_and<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(^ , std::bit_xor<>())
 
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(||, std::logical_or<>())
-            KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(&&, std::logical_and<>())
-        #undef KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP
-    }
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(||, std::logical_or<>())
+        KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP(&&, std::logical_and<>())
+    #undef KARI_HPP_DEFINE_UNDERSCORE_BINARY_OP
 }
 
 #undef KARI_HPP_NOEXCEPT_RETURN
