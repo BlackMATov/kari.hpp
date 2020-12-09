@@ -15,23 +15,44 @@ namespace kari_hpp
     template < std::size_t N, typename F, typename... Args >
     struct curry_t;
 
-    namespace detail
+    namespace impl
     {
-        template < std::size_t N, typename F, typename... Args >
-        constexpr auto make_curry(F&& f, std::tuple<Args...>&& args) {
-            if constexpr ( !N && std::is_invocable_v<std::decay_t<F>, Args...> ) {
-                return std::apply(std::forward<F>(f), std::move(args));
-            } else {
-                return curry_t<N, std::decay_t<F>, Args...>(std::forward<F>(f), std::move(args));
-            }
-        }
+        template < typename F >
+        struct is_curried_impl
+        : std::false_type {};
 
-        template < std::size_t N, typename F >
-        constexpr auto make_curry(F&& f) {
-            return make_curry<N>(std::forward<F>(f), std::make_tuple());
+        template < std::size_t N, typename F, typename... Args >
+        struct is_curried_impl<curry_t<N, F, Args...>>
+        : std::true_type {};
+    }
+
+    template < typename F >
+    struct is_curried
+    : impl::is_curried_impl<std::remove_cv_t<F>> {};
+
+    template < typename F >
+    inline constexpr bool is_curried_v = is_curried<F>::value;
+}
+
+namespace kari_hpp::detail
+{
+    template < std::size_t N, typename F, typename... Args >
+    constexpr auto curry_or_apply(F&& f, std::tuple<Args...>&& args) {
+        if constexpr ( !N && std::is_invocable_v<std::decay_t<F>, Args...> ) {
+            return std::apply(std::forward<F>(f), std::move(args));
+        } else {
+            return curry_t<N, std::decay_t<F>, Args...>(std::forward<F>(f), std::move(args));
         }
     }
 
+    template < std::size_t N, typename F >
+    constexpr auto curry_or_apply(F&& f) {
+        return curry_or_apply<N>(std::forward<F>(f), std::make_tuple());
+    }
+}
+
+namespace kari_hpp
+{
     template < std::size_t N, typename F, typename... Args >
     struct curry_t final {
         template < typename U >
@@ -51,11 +72,11 @@ namespace kari_hpp
         template < std::size_t M >
         constexpr decltype(auto) recurry() &&
             noexcept(noexcept(
-                detail::make_curry<M>(
+                detail::curry_or_apply<M>(
                     std::move(std::declval<F>()),
                     std::move(std::declval<std::tuple<Args...>>()))))
         {
-            return detail::make_curry<M>(
+            return detail::curry_or_apply<M>(
                 std::move(f_),
                 std::move(args_));
         }
@@ -80,13 +101,13 @@ namespace kari_hpp
         template < typename A >
         constexpr decltype(auto) operator()(A&& a) &&
             noexcept(noexcept(
-                detail::make_curry<(N > 0 ? N - 1 : 0)>(
+                detail::curry_or_apply<(N > 0 ? N - 1 : 0)>(
                 std::move(std::declval<F>()),
                 std::tuple_cat(
                     std::move(std::declval<std::tuple<Args...>>()),
                     std::make_tuple(std::forward<A>(a))))))
         {
-            return detail::make_curry<(N > 0 ? N - 1 : 0)>(
+            return detail::curry_or_apply<(N > 0 ? N - 1 : 0)>(
                 std::move(f_),
                 std::tuple_cat(
                     std::move(args_),
@@ -112,29 +133,10 @@ namespace kari_hpp
         F f_;
         std::tuple<Args...> args_;
     };
+}
 
-    //
-    // is_curried, is_curried_v
-    //
-
-    namespace detail
-    {
-        template < typename F >
-        struct is_curried_impl
-        : std::false_type {};
-
-        template < std::size_t N, typename F, typename... Args >
-        struct is_curried_impl<curry_t<N, F, Args...>>
-        : std::true_type {};
-    }
-
-    template < typename F >
-    struct is_curried
-    : detail::is_curried_impl<std::remove_cv_t<F>> {};
-
-    template < typename F >
-    inline constexpr bool is_curried_v = is_curried<F>::value;
-
+namespace kari_hpp
+{
     //
     // curry
     //
@@ -144,7 +146,7 @@ namespace kari_hpp
         if constexpr ( is_curried_v<std::decay_t<F>> ) {
             return std::forward<F>(f);
         } else {
-            return detail::make_curry<0>(std::forward<F>(f));
+            return detail::curry_or_apply<0>(std::forward<F>(f));
         }
     }
 
@@ -163,7 +165,7 @@ namespace kari_hpp
         if constexpr ( is_curried_v<std::decay_t<F>> ) {
             return std::forward<F>(f).template recurry<max_n>();
         } else {
-            return detail::make_curry<max_n>(std::forward<F>(f));
+            return detail::curry_or_apply<max_n>(std::forward<F>(f));
         }
     }
 
@@ -181,7 +183,7 @@ namespace kari_hpp
         if constexpr ( is_curried_v<std::decay_t<F>> ) {
             return std::forward<F>(f).template recurry<N>();
         } else {
-            return detail::make_curry<N>(std::forward<F>(f));
+            return detail::curry_or_apply<N>(std::forward<F>(f));
         }
     }
 
