@@ -8,6 +8,10 @@
 
 #include "kari.hpp"
 
+#include <functional>
+#include <type_traits>
+#include <utility>
+
 namespace kari_hpp
 {
     //

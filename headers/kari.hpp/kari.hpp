@@ -7,10 +7,8 @@
 #pragma once
 
 #include <tuple>
-#include <limits>
-#include <utility>
-#include <functional>
 #include <type_traits>
+#include <utility>
 
 namespace kari_hpp
 {
