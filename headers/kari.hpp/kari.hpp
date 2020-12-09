@@ -57,7 +57,6 @@ namespace kari_hpp
     struct curry_t final {
         template < typename U >
         constexpr curry_t(U&& u, std::tuple<Args...>&& args)
-        noexcept(noexcept(F(std::forward<U>(u))) && noexcept(std::tuple<Args...>(std::move(args))))
         : f_(std::forward<U>(u))
         , args_(std::move(args)) {}
 
@@ -70,43 +69,25 @@ namespace kari_hpp
         // recurry
 
         template < std::size_t M >
-        constexpr decltype(auto) recurry() &&
-            noexcept(noexcept(
-                detail::curry_or_apply<M>(
-                    std::move(std::declval<F>()),
-                    std::move(std::declval<std::tuple<Args...>>()))))
-        {
+        constexpr auto recurry() && {
             return detail::curry_or_apply<M>(
                 std::move(f_),
                 std::move(args_));
         }
 
         template < std::size_t M >
-        constexpr decltype(auto) recurry() const &
-            noexcept(noexcept(
-                std::move(std::declval<curry_t>()).template recurry<M>()))
-        {
+        constexpr auto recurry() const & {
             return std::move(curry_t(*this)).template recurry<M>();
         }
 
         // operator(As&&...)
 
-        constexpr decltype(auto) operator()() &&
-            noexcept(noexcept(
-                std::move(std::declval<curry_t>()).template recurry<0>()))
-        {
+        constexpr auto operator()() && {
             return std::move(*this).template recurry<0>();
         }
 
         template < typename A >
-        constexpr decltype(auto) operator()(A&& a) &&
-            noexcept(noexcept(
-                detail::curry_or_apply<(N > 0 ? N - 1 : 0)>(
-                std::move(std::declval<F>()),
-                std::tuple_cat(
-                    std::move(std::declval<std::tuple<Args...>>()),
-                    std::make_tuple(std::forward<A>(a))))))
-        {
+        constexpr auto operator()(A&& a) && {
             return detail::curry_or_apply<(N > 0 ? N - 1 : 0)>(
                 std::move(f_),
                 std::tuple_cat(
@@ -115,18 +96,12 @@ namespace kari_hpp
         }
 
         template < typename A, typename... As >
-        constexpr decltype(auto) operator()(A&& a, As&&... as) &&
-            noexcept(noexcept(
-                std::move(std::declval<curry_t>())(std::forward<A>(a))(std::forward<As>(as)...)))
-        {
+        constexpr auto operator()(A&& a, As&&... as) && {
             return std::move(*this)(std::forward<A>(a))(std::forward<As>(as)...);
         }
 
         template < typename... As >
-        constexpr decltype(auto) operator()(As&&... as) const &
-            noexcept(noexcept(
-                std::move(std::declval<curry_t>())(std::forward<As>(as)...)))
-        {
+        constexpr auto operator()(As&&... as) const & {
             return std::move(curry_t(*this))(std::forward<As>(as)...);
         }
     private:
