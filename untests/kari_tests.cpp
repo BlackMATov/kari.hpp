@@ -7,194 +7,15 @@
 #include <kari.hpp/kari.hpp>
 #include "doctest/doctest.hpp"
 
+#include "kari_tests.hpp"
+
+using namespace kari_hpp;
+using namespace kari_tests;
+
 #include <cstdio>
 #include <cstring>
 
-namespace
-{
-    const auto _42_tl = []() {
-        return 42;
-    };
-
-    const auto id_tl = [](int v) {
-        return v;
-    };
-
-    const auto minus2_tl = [](int v1, int v2) {
-        return v1 - v2;
-    };
-
-    const auto minus3_tl = [](int v1, int v2, int v3) {
-        return v1 - v2 - v3;
-    };
-
-    const auto minus4_tl = [](int v1, int v2, int v3, int v4) {
-        return v1 - v2 - v3 - v4;
-    };
-}
-
-namespace
-{
-    const auto id_gl = [](auto&& v) {
-        return v;
-    };
-
-    const auto minus2_gl = [](auto&& v1, auto&& v2) {
-        return v1 - v2;
-    };
-
-    const auto minus3_gl = [](auto&& v1, auto&& v2, auto&& v3) {
-        return v1 - v2 - v3;
-    };
-
-    const auto minus4_gl = [](auto&& v1, auto&& v2, auto&& v3, auto&& v4) {
-        return v1 - v2 - v3 - v4;
-    };
-}
-
-namespace
-{
-    struct id_gf {
-        template < typename T >
-        constexpr auto operator()(T&& v) const {
-            return v;
-        }
-    };
-
-    struct minus2_gf {
-        template < typename T1, typename T2 >
-        constexpr auto operator()(T1&& v1, T2&& v2) const {
-            return v1 - v2;
-        }
-    };
-
-    struct minus3_gf {
-        template < typename T1, typename T2, typename T3 >
-        constexpr auto operator()(T1&& v1, T2&& v2, T3&& v3) const {
-            return v1 - v2 - v3;
-        }
-    };
-
-    struct plusV_gf {
-        template < typename A >
-        constexpr decltype(auto) operator()(A&& a) const {
-            return std::forward<A>(a);
-        }
-
-        template < typename A, typename B >
-        constexpr decltype(auto) operator()(A&& a, B&& b) const {
-            return std::forward<A>(a) + std::forward<B>(b);
-        }
-
-        template < typename A, typename B, typename... Cs >
-        constexpr decltype(auto) operator()(A&& a, B&& b, Cs&&... cs) const {
-            return (*this)(
-                (*this)(std::forward<A>(a), std::forward<B>(b)),
-                std::forward<Cs>(cs)...);
-        }
-    };
-}
-
-namespace
-{
-    struct box {
-        box(int v) : v_(v) {}
-        ~box() {
-            v_ = 100500;
-        }
-
-        box(box&& o) : v_(o.v_) {
-            o.v_ = 100500;
-            ++moveCount_;
-        }
-
-        box(const box& o) : v_(o.v_) {
-            ++copyCount_;
-        }
-
-        box& operator=(box&& o) = delete;
-        box& operator=(const box&) = delete;
-
-        int v() const { return v_; }
-
-        int addV(int add) {
-            v_ += add;
-            return v_;
-        }
-
-        static void resetCounters() {
-            moveCount_ = 0;
-            copyCount_ = 0;
-        }
-
-        static int moveCount() {
-            return moveCount_;
-        }
-
-        static int copyCount() {
-            return copyCount_;
-        }
-    private:
-        int v_;
-        static int moveCount_;
-        static int copyCount_;
-    };
-
-    int box::moveCount_;
-    int box::copyCount_;
-
-    static box operator+(const box& lhs, const box& rhs) {
-        return box(lhs.v() + rhs.v());
-    }
-
-    static box operator-(const box& lhs, const box& rhs) {
-        return box(lhs.v() - rhs.v());
-    }
-}
-
-namespace
-{
-    struct box_without_move {
-        box_without_move(int v) : v_(v) {}
-        ~box_without_move() {
-            v_ = 100500;
-        }
-
-        box_without_move(const box_without_move& o) : v_(o.v_) {
-            ++copyCount_;
-        }
-
-        box_without_move& operator=(const box_without_move&) = delete;
-
-        int v() const { return v_; }
-
-        int addV(int add) {
-            v_ += add;
-            return v_;
-        }
-
-        static void resetCounters() {
-            copyCount_ = 0;
-        }
-
-        static int copyCount() {
-            return copyCount_;
-        }
-    private:
-        int v_;
-        static int copyCount_;
-    };
-
-    int box_without_move::copyCount_;
-
-    static box_without_move operator+(const box_without_move& lhs, const box_without_move& rhs) {
-        return box_without_move(lhs.v() + rhs.v());
-    }
-}
-
-using namespace kari_hpp;
-
-TEST_CASE("kari_feature") {
+TEST_CASE("kari") {
     SUBCASE("ref_functor") {
         REQUIRE(curry(minus3_gf())(1,2,3) == -4);
         {
@@ -232,7 +53,7 @@ TEST_CASE("kari_feature") {
     }
     SUBCASE("move_vs_copy") {
         {
-            box::resetCounters();
+            box<>::resetCounters();
             const auto b1 = box(1);
             const auto b2 = box(2);
             const auto b3 = box(3);
@@ -241,11 +62,11 @@ TEST_CASE("kari_feature") {
             curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             })(std::move(b1))(std::move(b2))(std::move(b3))(std::move(b4))(std::move(b5));
-            REQUIRE(box::moveCount() == 25);
-            REQUIRE(box::copyCount() == 5);
+            REQUIRE(box<>::moveCount() == 25);
+            REQUIRE(box<>::copyCount() == 5);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             auto b1 = box(1);
             auto b2 = box(2);
             auto b3 = box(3);
@@ -254,35 +75,35 @@ TEST_CASE("kari_feature") {
             curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             })(std::move(b1))(std::move(b2))(std::move(b3))(std::move(b4))(std::move(b5));
-            REQUIRE(box::moveCount() == 30);
-            REQUIRE(box::copyCount() == 0);
+            REQUIRE(box<>::moveCount() == 30);
+            REQUIRE(box<>::copyCount() == 0);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             })(box(1))(box(2))(box(3))(box(4))(box(5));
-            REQUIRE(box::moveCount() == 30);
-            REQUIRE(box::copyCount() == 0);
+            REQUIRE(box<>::moveCount() == 30);
+            REQUIRE(box<>::copyCount() == 0);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             })(box(1),box(2))(box(3),box(4))(box(5));
-            REQUIRE(box::moveCount() == 30);
-            REQUIRE(box::copyCount() == 0);
+            REQUIRE(box<>::moveCount() == 30);
+            REQUIRE(box<>::copyCount() == 0);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             })(box(1),box(2),box(3),box(4),box(5));
-            REQUIRE(box::moveCount() == 30);
-            REQUIRE(box::copyCount() == 0);
+            REQUIRE(box<>::moveCount() == 30);
+            REQUIRE(box<>::copyCount() == 0);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             const auto c0 = curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             });
@@ -292,11 +113,11 @@ TEST_CASE("kari_feature") {
             const auto c4 = c3(box(4));
             const auto c5 = c4(box(5));
             REQUIRE(c5.v() == 15);
-            REQUIRE(box::moveCount() == 30);
-            REQUIRE(box::copyCount() == 10);
+            REQUIRE(box<>::moveCount() == 30);
+            REQUIRE(box<>::copyCount() == 10);
         }
         {
-            box_without_move::resetCounters();
+            box_without_move<>::resetCounters();
             const auto c0 = curry([](auto&& v1, auto&& v2, auto&& v3, auto&& v4, auto&& v5){
                 return v1 + v2 + v3 + v4 + v5;
             });
@@ -306,16 +127,16 @@ TEST_CASE("kari_feature") {
             const auto c4 = c3(box_without_move(4));
             const auto c5 = c4(box_without_move(5));
             REQUIRE(c5.v() == 15);
-            REQUIRE(box_without_move::copyCount() == 40);
+            REQUIRE(box_without_move<>::copyCount() == 40);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             curryV(plusV_gf())(box(1),box(2),box(3),box(4),box(5))();
-            REQUIRE(box::moveCount() == 35);
-            REQUIRE(box::copyCount() == 0);
+            REQUIRE(box<>::moveCount() == 35);
+            REQUIRE(box<>::copyCount() == 0);
         }
         {
-            box::resetCounters();
+            box<>::resetCounters();
             const auto c0 = curryV(plusV_gf());
             const auto c1 = c0(box(1));
             const auto c2 = c1(box(2));
@@ -323,8 +144,8 @@ TEST_CASE("kari_feature") {
             const auto c4 = c3(box(4));
             const auto c5 = c4(box(5));
             REQUIRE(c5().v() == 15);
-            REQUIRE(box::moveCount() == 35);
-            REQUIRE(box::copyCount() == 15);
+            REQUIRE(box<>::moveCount() == 35);
+            REQUIRE(box<>::copyCount() == 15);
         }
     }
     SUBCASE("persistent") {
@@ -352,7 +173,7 @@ TEST_CASE("kari_feature") {
     }
 }
 
-TEST_CASE("kari") {
+TEST_CASE("kari/curry") {
     SUBCASE("arity/min_arity") {
         REQUIRE(curry(minus3_gl).min_arity() == 0);
         REQUIRE(curryV(plusV_gf()).min_arity() == std::numeric_limits<std::size_t>::max());
@@ -549,14 +370,14 @@ TEST_CASE("kari") {
     }
     SUBCASE("member_functions") {
         {
-            auto c0 = curry(&box::addV);
-            auto c1 = curry(&box::v);
+            auto c0 = curry(&box<>::addV);
+            auto c1 = curry(&box<>::v);
             REQUIRE(c0(box(10), 2) == 12);
             REQUIRE(c1(box(12)) == 12);
         }
         {
-            auto c0 = curry(&box::addV);
-            auto c1 = curry(&box::v);
+            auto c0 = curry(&box<>::addV);
+            auto c1 = curry(&box<>::v);
 
             auto b1 = box(10);
             const auto b2 = box(10);
@@ -572,7 +393,7 @@ TEST_CASE("kari") {
         }
     }
     SUBCASE("member_objects") {
-        struct box2 : box {
+        struct box2 : box<> {
             box2(int v) : box(v), ov(v) {}
             int ov;
         };

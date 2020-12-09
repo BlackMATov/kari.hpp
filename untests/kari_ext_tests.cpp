@@ -7,9 +7,66 @@
 #include <kari.hpp/kari_ext.hpp>
 #include "doctest/doctest.hpp"
 
-using namespace kari_hpp;
+#include "kari_tests.hpp"
 
-TEST_CASE("kari_feature") {
+using namespace kari_hpp;
+using namespace kari_tests;
+
+TEST_CASE("kari_ext") {
+    SUBCASE("fid") {
+        REQUIRE(fid(box(10)).v() == 10);
+    }
+
+    SUBCASE("fconst") {
+        REQUIRE(fconst(box(10), 20).v() == 10);
+        {
+            auto b10 = fconst(box(10));
+            REQUIRE(b10(20).v() == 10);
+            REQUIRE(std::move(b10)(30).v() == 10);
+            REQUIRE(b10(20).v() == 100500);
+        }
+    }
+
+    SUBCASE("fflip") {
+        REQUIRE(fflip(curry(std::minus<>()))(10, 20) == 10);
+        REQUIRE(fflip(minus3_gl)(10,20,50) == -40);
+    }
+
+    SUBCASE("fpipe") {
+        using namespace underscore;
+        REQUIRE(fpipe(_+2, _*2, 4) == 12);
+        REQUIRE(((_+2) | (_*2) | 4) == 12);
+        REQUIRE((4 | (_+2) | (_*2)) == 12);
+    }
+
+    SUBCASE("fcompose") {
+        using namespace underscore;
+        REQUIRE(fcompose(_+2, _*2, 4) == 10);
+        REQUIRE((_+2) * (_*2) * 4 == 10);
+        REQUIRE(4 * (_+2) * (_*2) == 12);
+        {
+            const auto s3 = [](int v1, int v2, int v3){
+                return v1 + v2 + v3;
+            };
+            const auto c = curry(s3) * (_*2) * 10 * 20 * 30;
+            REQUIRE(c == 70);
+        }
+        {
+            // (. (+2)) (*2) $ 10 == 24
+            int i = fflip(fcompose)(_+2, _*2, 10);
+            int j = (_*(_+2))(_*2)(10);
+            REQUIRE(i == 24);
+            REQUIRE(j == 24);
+        }
+        {
+            // ((+2) .) (*2) $ 10 == 24
+            int i = fcompose(_+2)(_*2, 10);
+            int j = ((_+2) * _)(_*2)(10);
+            REQUIRE(i == 22);
+            REQUIRE(j == 22);
+        }
+    }
+
     SUBCASE("underscore") {
         using namespace underscore;
         REQUIRE((-_)(40) == -40);
