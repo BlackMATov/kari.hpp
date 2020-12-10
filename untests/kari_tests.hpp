@@ -67,25 +67,6 @@ namespace kari_tests
             return v1 - v2 - v3;
         }
     };
-
-    struct plusV_gf {
-        template < typename A >
-        constexpr decltype(auto) operator()(A&& a) const {
-            return std::forward<A>(a);
-        }
-
-        template < typename A, typename B >
-        constexpr decltype(auto) operator()(A&& a, B&& b) const {
-            return std::forward<A>(a) + std::forward<B>(b);
-        }
-
-        template < typename A, typename B, typename... Cs >
-        constexpr decltype(auto) operator()(A&& a, B&& b, Cs&&... cs) const {
-            return (*this)(
-                (*this)(std::forward<A>(a), std::forward<B>(b)),
-                std::forward<Cs>(cs)...);
-        }
-    };
 }
 
 namespace kari_tests

@@ -130,24 +130,6 @@ TEST_CASE("kari") {
             REQUIRE(c5.v() == 15);
             REQUIRE(box_without_move<>::copyCount() == 40);
         }
-        {
-            box<>::resetCounters();
-            curryV(plusV_gf())(box(1),box(2),box(3),box(4),box(5))();
-            REQUIRE(box<>::moveCount() == 35);
-            REQUIRE(box<>::copyCount() == 0);
-        }
-        {
-            box<>::resetCounters();
-            const auto c0 = curryV(plusV_gf());
-            const auto c1 = c0(box(1));
-            const auto c2 = c1(box(2));
-            const auto c3 = c2(box(3));
-            const auto c4 = c3(box(4));
-            const auto c5 = c4(box(5));
-            REQUIRE(c5().v() == 15);
-            REQUIRE(box<>::moveCount() == 35);
-            REQUIRE(box<>::copyCount() == 15);
-        }
     }
     SUBCASE("persistent") {
         auto c        = curry(minus3_gl);
@@ -175,31 +157,6 @@ TEST_CASE("kari") {
 }
 
 TEST_CASE("kari/curry") {
-    SUBCASE("arity/min_arity") {
-        REQUIRE(curry(minus3_gl).min_arity() == 0);
-        REQUIRE(curryV(plusV_gf()).min_arity() == std::numeric_limits<std::size_t>::max());
-        REQUIRE(curryN<3>(plusV_gf()).min_arity() == 3);
-        REQUIRE(curryN<3>(plusV_gf())(1).min_arity() == 2);
-        REQUIRE(curryN<3>(plusV_gf())(1)(2).min_arity() == 1);
-    }
-    SUBCASE("arity/recurring") {
-        constexpr auto max_size_t = std::numeric_limits<std::size_t>::max();
-        {
-            REQUIRE(curry(curry(minus3_gl)).min_arity() == 0);
-            REQUIRE(curry(curryV(plusV_gf())).min_arity() == max_size_t);
-            REQUIRE(curry(curryN<3>(plusV_gf())).min_arity() == 3);
-        }
-        {
-            REQUIRE(curryV(curry(minus3_gl)).min_arity() == max_size_t);
-            REQUIRE(curryV(curryV(plusV_gf())).min_arity() == max_size_t);
-            REQUIRE(curryV(curryN<3>(plusV_gf())).min_arity() == max_size_t);
-        }
-        {
-            REQUIRE(curryN<2>(curry(minus3_gl)).min_arity() == 2);
-            REQUIRE(curryN<2>(curryV(plusV_gf())).min_arity() == 2);
-            REQUIRE(curryN<2>(curryN<3>(plusV_gf())).min_arity() == 2);
-        }
-    }
     SUBCASE("is_curried") {
         static_assert(!is_curried_v<void(int)>, "static unit test error");
         static_assert(!is_curried_v<decltype(minus2_gl)>, "static unit test error");
@@ -307,68 +264,6 @@ TEST_CASE("kari/curry") {
             })(9)(4,3) == 2);
         }
     }
-    SUBCASE("variadic_functions") {
-        {
-            const auto c = curry(plusV_gf());
-            REQUIRE(c(15) == 15);
-            REQUIRE(curry(plusV_gf(), 6) == 6);
-        }
-        {
-            const auto c = curryV(plusV_gf());
-            REQUIRE(c(1,2,3,4,5)() == 15);
-            REQUIRE(curryV(plusV_gf(), 1, 2, 3)() == 6);
-        }
-        {
-            const auto c = curryN<3>(plusV_gf());
-            REQUIRE(c(1,2,3) == 6);
-            REQUIRE(curryN<0>(plusV_gf(), 1, 2, 3) == 6);
-        }
-        {
-            char buffer[256] = {'\0'};
-            auto c = curryV(std::snprintf, buffer, 256, "%d + %d = %d");
-            c(37, 5, 42)();
-            REQUIRE(std::strcmp("37 + 5 = 42", buffer) == 0);
-        }
-        {
-            char buffer[256] = {'\0'};
-            auto c = curryN<3>(std::snprintf, buffer, 256, "%d + %d = %d");
-            c(37, 5, 42);
-            REQUIRE(std::strcmp("37 + 5 = 42", buffer) == 0);
-        }
-    }
-    SUBCASE("variadic_functions/recurring") {
-        {
-            auto c0 = curry(curry(plusV_gf()));
-            auto c1 = curry(curryV(plusV_gf()));
-            auto c2 = curry(curryN<3>(plusV_gf()));
-            REQUIRE(c0(42) == 42);
-            REQUIRE(c1(40,2)() == 42);
-            REQUIRE(c2(37,2,3) == 42);
-        }
-        {
-            auto c0 = curryV(curry(plusV_gf()));
-            auto c1 = curryV(curryV(plusV_gf()));
-            auto c2 = curryV(curryN<3>(plusV_gf()));
-            REQUIRE(c0(40,2)() == 42);
-            REQUIRE(c1(40,2)() == 42);
-            REQUIRE(c2(40,2)() == 42);
-        }
-        {
-            auto c0 = curryN<2>(curry(plusV_gf()));
-            auto c1 = curryN<2>(curryV(plusV_gf()));
-            auto c2 = curryN<2>(curryN<3>(plusV_gf()));
-            auto c3 = curryN<4>(curryN<3>(plusV_gf()));
-            REQUIRE(c0(40,2) == 42);
-            REQUIRE(c1(40,2) == 42);
-            REQUIRE(c2(40,2) == 42);
-            REQUIRE(c3(20,15,5,2) == 42);
-        }
-        {
-            auto c0 = curry(plusV_gf());
-            auto c1 = curryN<2>(c0);
-            REQUIRE(c1(40,2) == 42);
-        }
-    }
     SUBCASE("member_functions") {
         {
             auto c0 = curry(&box<>::addV);
@@ -414,8 +309,8 @@ namespace kari_regression {
         template < typename C >
         struct first_type_impl;
 
-        template < std::size_t N, typename F, typename A, typename... Args >
-        struct first_type_impl<curry_t<N, F, A, Args...>> {
+        template < typename F, typename A, typename... Args >
+        struct first_type_impl<curry_t<F, A, Args...>> {
             using type = A;
         };
 
@@ -439,10 +334,5 @@ TEST_CASE("kari_regression") {
             typename first_type<decltype(c1)>::type,
             typename first_type<decltype(c2)>::type
         >::value,"static unit test error");
-    }
-    SUBCASE("curryN_already_curried_function") {
-        auto c = curryN<3>(plusV_gf());
-        auto c2 = curryN<3>(c);
-        REQUIRE(c2(1,2,3) == 6);
     }
 }
