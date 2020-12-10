@@ -12,8 +12,8 @@
 
 namespace kari_hpp
 {
-    template < typename F, typename... Args >
-    struct curry_t;
+    template < typename F, typename... As >
+    class curry_t;
 
     namespace impl
     {
@@ -21,8 +21,8 @@ namespace kari_hpp
         struct is_curried_impl
         : std::false_type {};
 
-        template < typename F, typename... Args >
-        struct is_curried_impl<curry_t<F, Args...>>
+        template < typename F, typename... As >
+        struct is_curried_impl<curry_t<F, As...>>
         : std::true_type {};
     }
 
@@ -44,38 +44,29 @@ namespace kari_hpp::detail
             return curry_t<std::decay_t<F>, Args...>(std::forward<F>(f), std::move(args));
         }
     }
-
-    template < typename F >
-    constexpr auto curry_or_apply(F&& f) {
-        return curry_or_apply(std::forward<F>(f), std::make_tuple());
-    }
 }
 
 namespace kari_hpp
 {
     template < typename F, typename... Args >
-    struct curry_t final {
-        template < typename U >
-        constexpr curry_t(U&& u, std::tuple<Args...>&& args)
-        : f_(std::forward<U>(u))
+    class curry_t final {
+        constexpr curry_t(F f, std::tuple<Args...> args)
+        : f_(std::move(f))
         , args_(std::move(args)) {}
 
-        // recurry
+        template < typename U, typename... As >
+        friend class curry_t;
 
-        constexpr auto recurry() && {
+        template < typename U, typename... As >
+        friend constexpr auto detail::curry_or_apply(U&&, std::tuple<As...>&&);
+    public:
+        constexpr curry_t(F f)
+        : f_(std::move(f)) {}
+
+        constexpr auto operator()() && {
             return detail::curry_or_apply(
                 std::move(f_),
                 std::move(args_));
-        }
-
-        constexpr auto recurry() const & {
-            return std::move(curry_t(*this)).recurry();
-        }
-
-        // operator(As&&...)
-
-        constexpr auto operator()() && {
-            return std::move(*this).template recurry<0>();
         }
 
         template < typename A >
@@ -104,16 +95,12 @@ namespace kari_hpp
 
 namespace kari_hpp
 {
-    //
-    // curry
-    //
-
     template < typename F >
     constexpr auto curry(F&& f) {
         if constexpr ( is_curried_v<std::decay_t<F>> ) {
             return std::forward<F>(f);
         } else {
-            return detail::curry_or_apply(std::forward<F>(f));
+            return detail::curry_or_apply(std::forward<F>(f), {});
         }
     }
 
