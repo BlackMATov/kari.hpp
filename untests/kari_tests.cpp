@@ -14,6 +14,7 @@ using namespace kari_tests;
 
 #include <cstdio>
 #include <cstring>
+#include <functional>
 
 TEST_CASE("kari") {
     SUBCASE("ref_functor") {
