@@ -4,10 +4,11 @@
  * Copyright (C) 2017-2020, by Matvey Cherevko (blackmatov@gmail.com)
  ******************************************************************************/
 
-#include <kari.hpp/kari_ext.hpp>
+#include <kari.hpp/kari.hpp>
 #include "doctest/doctest.hpp"
 
 using namespace kari_hpp;
+using namespace kari_hpp::ext;
 
 TEST_CASE("kari_ext") {
     struct box final {
