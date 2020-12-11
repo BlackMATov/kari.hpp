@@ -14,24 +14,30 @@ using namespace kari_hpp;
 TEST_CASE("kari") {
     SUBCASE("ctor") {
         {
-            constexpr curry_t f = [](){
+            constexpr auto l = [](){
                 return 1;
             };
+
+            constexpr curry_t f = l;
 
             STATIC_REQUIRE(f() == 1);
         }
         {
-            constexpr curry_t f = [](auto a){
+            constexpr auto l = [](auto a){
                 return a;
             };
+
+            constexpr curry_t f = l;
 
             STATIC_REQUIRE(f(1) == 1);
             STATIC_REQUIRE(f()(1) == 1);
         }
         {
-            constexpr curry_t f = [](auto a, auto b){
+            constexpr auto l = [](auto a, auto b){
                 return a + b;
             };
+
+            constexpr curry_t f = l;
 
             STATIC_REQUIRE(f(1,2) == 3);
             STATIC_REQUIRE(f()(1,2) == 3);
@@ -42,9 +48,11 @@ TEST_CASE("kari") {
             STATIC_REQUIRE(f()(1)()(2) == 3);
         }
         {
-            constexpr curry_t f = [](auto a, auto b, auto c){
+            constexpr auto l = [](auto a, auto b, auto c){
                 return a + b + c;
             };
+
+            constexpr curry_t f = l;
 
             STATIC_REQUIRE(f(1,2,3) == 6);
             STATIC_REQUIRE(f()(1,2,3) == 6);
@@ -71,11 +79,13 @@ TEST_CASE("kari") {
 
     SUBCASE("nested ctor") {
         {
-            constexpr auto f = curry_t([](auto a){
+            constexpr auto l = [](auto a){
                 return curry_t([a](auto b, auto c){
                     return a + b + c;
                 });
-            });
+            };
+
+            constexpr curry_t f = l;
 
             STATIC_REQUIRE(f(1,2,3) == 6);
             STATIC_REQUIRE(f()(1,2,3) == 6);
@@ -99,11 +109,13 @@ TEST_CASE("kari") {
             STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
         }
         {
-            constexpr auto f = curry_t([](auto a, auto b){
+            constexpr auto l = [](auto a, auto b){
                 return curry_t([a, b](auto c){
                     return a + b + c;
                 });
-            });
+            };
+
+            constexpr curry_t f = l;
 
             STATIC_REQUIRE(f(1,2,3) == 6);
             STATIC_REQUIRE(f()(1,2,3) == 6);

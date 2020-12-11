@@ -84,9 +84,11 @@ TEST_CASE("kari_examples") {
     SUBCASE("API/is_curried") {
         using namespace kari_hpp;
 
-        constexpr curry_t c = [](int a, int b){
+        constexpr auto l = [](int a, int b){
             return a + b;
         };
+
+        constexpr curry_t c = l;
 
         STATIC_REQUIRE(is_curried_v<decltype(c)>);
         STATIC_REQUIRE(is_curried<decltype(c)>::value);
