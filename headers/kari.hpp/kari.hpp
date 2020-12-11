@@ -42,7 +42,7 @@ namespace kari_hpp::detail
         if constexpr ( std::is_invocable_v<std::decay_t<F>, Args...> ) {
             return std::apply(std::forward<F>(f), std::move(args));
         } else {
-            return curry_t<std::decay_t<F>, Args...>(std::forward<F>(f), std::move(args));
+            return curry_t(std::forward<F>(f), std::move(args));
         }
     }
 }
@@ -51,18 +51,13 @@ namespace kari_hpp
 {
     template < typename F, typename... Args >
     class curry_t final {
-        constexpr curry_t(F f, std::tuple<Args...> args)
-        : f_(std::move(f))
-        , args_(std::move(args)) {}
-
-        template < typename U, typename... As >
-        friend class curry_t;
-
-        template < typename U, typename... As >
-        friend constexpr auto detail::curry_or_apply(U&&, std::tuple<As...>&&);
     public:
         constexpr curry_t(F f)
         : f_(std::move(f)) {}
+
+        constexpr curry_t(F f, std::tuple<Args...> args)
+        : f_(std::move(f))
+        , args_(std::move(args)) {}
 
         constexpr auto operator()() && {
             return detail::curry_or_apply(
