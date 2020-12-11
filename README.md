@@ -52,14 +52,16 @@ target_link_libraries(your_project_target kari.hpp)
 ### Basic currying
 
 ```cpp
+using namespace kari_hpp;
+
 auto foo = [](int v1, int v2, int v3) {
   return v1 + v2 + v3;
 };
 
-auto c0 = kari::curry(foo); // currying of `foo` function
-auto c1 = c0(10);           // apply to first argument
-auto c2 = c1(20);           // apply to second argument
-auto rr = c2(12);           // apply to third argument and call the `foo` function
+auto c0 = curry(foo); // currying of `foo` function
+auto c1 = c0(10);     // apply to first argument
+auto c2 = c1(20);     // apply to second argument
+auto rr = c2(12);     // apply to third argument and call the `foo` function
 
 // output: 42
 std::cout << rr << std::endl;
@@ -68,13 +70,14 @@ std::cout << rr << std::endl;
 ### Partial application of curried functions
 
 ```cpp
-auto foo = [](int v1, int v2, int v3, int v4) {
+using namespace kari_hpp;
+
+curry_t c0 = [](int v1, int v2, int v3, int v4) {
   return v1 + v2 + v3 + v4;
 };
 
-auto c0 = kari::curry(foo); // currying
-auto c1 = c0(15, 20);       // partial application of two arguments
-auto rr = c1(2, 5);         // partial application and call `foo(15,20,2,5)`
+auto c1 = c0(15, 20); // partial application of two arguments
+auto rr = c1(2, 5);   // partial application and call `(15,20,2,5)`
 
 // output: 42
 std::cout << rr << std::endl;
@@ -83,17 +86,19 @@ std::cout << rr << std::endl;
 ### Calling nested curried functions
 
 ```cpp
-auto boo = [](int v1, int v2) {
-  return v1 + v2;
+using namespace kari_hpp;
+
+curry_t boo = [](int a, int b) {
+  return a + b;
 };
 
-auto foo = [boo](int v1, int v2) {
-  return kari::curry(boo, v1 + v2);
+curry_t foo = [boo](int a, int b) {
+  return boo(a + b);
 };
 
-auto c0 = kari::curry(foo)(38,3,1);
-auto c1 = kari::curry(foo)(38,3)(1);
-auto c2 = kari::curry(foo)(38)(3,1);
+auto c0 = foo(38,3,1);
+auto c1 = foo(38,3)(1);
+auto c2 = foo(38)(3,1);
 
 // output: 42,42,42
 std::cout << c0 << "," << c1 << "," << c2 << std::endl;
@@ -102,19 +107,21 @@ std::cout << c0 << "," << c1 << "," << c2 << std::endl;
 ### Binding member functions and member objects
 
 ```cpp
-struct Foo {
+using namespace kari_hpp;
+
+struct foo_t {
   int v = 40;
-  int addV(int add) {
+  int add_v(int add) {
     v += add;
     return v;
   }
 } foo;
 
-auto c0 = kari::curry(&Foo::addV);
-auto c1 = kari::curry(&Foo::v);
+auto c0 = curry(&foo_t::add_v);
+auto c1 = curry(&foo_t::v);
 
 auto r0 = c0(std::ref(foo))(2);
-auto r1 = c1(foo);
+auto r1 = c1(std::cref(foo));
 
 // output: 42,42
 std::cout << r0 << "," << r1 << std::endl;
@@ -123,15 +130,9 @@ std::cout << r0 << "," << r1 << std::endl;
 ## API
 
 ```cpp
-namespace kari {
+namespace kari_hpp {
   template < typename F, typename... Args >
-  constexpr decltype(auto) curry(F&& f, Args&&... args) const;
-
-  template < typename F, typename... Args >
-  constexpr decltype(auto) curryV(F&& f, Args&&... args) const;
-
-  template < std::size_t N, typename F, typename... Args >
-  constexpr decltype(auto) curryN(F&& f, Args&&... args) const;
+  constexpr auto curry(F&& f, Args&&... args);
 
   template < typename F >
   struct is_curried;
@@ -139,59 +140,34 @@ namespace kari {
   template < typename F >
   inline constexpr bool is_curried_v = is_curried<F>::value;
 
-  template < std::size_t N, typename F, typename... Args >
-  struct curry_t {
+  template < typename F, typename... Args >
+  class curry_t {
+    constexpr curry_t(F f);
+
     template < typename... As >
-    constexpr decltype(auto) operator()(As&&... as) const;
+    constexpr auto operator()(As&&... as) const;
   };
 }
 ```
 
 ---
 
-### `kari::curry(F&& f, Args&&... args)`
+### `kari_hpp::curry(F&& f, Args&&... args)`
 
 Returns a curried function **`f`** or copy the function result with **`args`** arguments.
 
 ---
 
-### `kari::curryV(F&& f, Args&&... args)`
-
-Allows carrying variadic functions.
-
-```cpp
-auto c0 = kari::curryV(std::printf, "%d + %d = %d");
-auto c1 = c0(37, 5);
-auto c2 = c1(42);
-
-// force calling carried variadic function
-c2(); // output: 37 + 5 = 42
-```
-
----
-
-### `kari::curryN(F&& f, Args&&... args)`
-
-Allows carrying variadic functions for **`N`** arguments.
-
-```cpp
-char buffer[256] = {'\0'};
-auto c = kari::curryN<3>(std::snprintf, buffer, 256, "%d + %d = %d");
-c(37, 5, 42);
-std::cout << buffer << std::endl;  // output: 37 + 5 = 42
-```
-
----
-
-### `kari::is_curried<F>, kari::is_curried_v<F>`
+### `kari_hpp::is_curried<F>, kari_hpp::is_curried_v<F>`
 
 Checks whether F is a curried function type.
 
 ```cpp
-auto l = [](int v1, int v2){
-  return v1 + v2;
+using namespace kari_hpp;
+
+constexpr curry_t c = [](int a, int b){
+  return a + b;
 };
-auto c = curry(l);
 
 // output: is `l` curried? no
 std::cout
@@ -208,18 +184,19 @@ std::cout
 
 ---
 
-### `kari::curry_t::operator()(As&&... as)`
+### `kari_hpp::curry_t::operator()(As&&... as)`
 
 Calling operator of curried function for partial application or full application. Returns a new curried function with added new arguments or copy of the function result.
 
 ```cpp
-int foo(int v1, int v2, int v3, int v4) {
-  return v1 + v2 + v3 + v4;
-}
+using namespace kari_hpp;
 
-auto c0 = kari::curry(foo); // currying
-auto c1 = c0(15, 20);       // partial application
-auto rr = c2(2, 5);         // function call - foo(15,20,2,5)
+curry_t c0 = [](int a, int b, int c, int d) {
+  return a + b + c + d;
+};
+
+auto c1 = c0(15, 20); // partial application
+auto rr = c2(2, 5);   // function call - foo(15,20,2,5)
 
 // output: 42
 std::cout << rr << std::endl;
@@ -232,17 +209,17 @@ std::cout << rr << std::endl;
 ### Section of operators
 
 ```cpp
-using namespace kari::underscore;
-std::vector<int> v{1,2,3,4};
+using namespace kari_hpp::ext::underscore;
+std::vector v{1, 2, 3, 4};
 
 // result: 10
-std::accumulate(v.begin(), v.end(), 0, _+_);
+std::accumulate(v.begin(), v.end(), 0, _ + _);
 
-// v = 2, 3, 6, 8
-std::transform(v.begin(), v.end(), v.begin(), _*2);
+// v = {2, 4, 6, 8}
+std::transform(v.begin(), v.end(), v.begin(), _ * 2);
 
-// v = -2,-3,-6,-8
-std::transform(v.begin(), v.end(), v.begin(), -_);
+// v = {-2, -4, -6, -8}
+std::transform(v.begin(), v.end(), v.begin(), - _);
 ```
 
 ### Function composition
@@ -250,7 +227,8 @@ std::transform(v.begin(), v.end(), v.begin(), -_);
 #### Pipe operator
 
 ```cpp
-using namespace kari::underscore;
+using namespace kari_hpp::ext;
+using namespace kari_hpp::ext::underscore;
 
 auto r0 = (_*2) | (_+2) | 4; // (4 * 2) + 2 = 10
 auto r1 = 4 | (_*2) | (_+2); // (4 * 2 + 2) = 10
@@ -262,7 +240,8 @@ std::cout << r0, << "," << r1 << std::endl;
 #### Compose operator
 
 ```cpp
-using namespace kari::underscore;
+using namespace kari_hpp::ext;
+using namespace kari_hpp::ext::underscore;
 
 auto r0 = (_*2) * (_+2) * 4; // (4 + 2) * 2 = 12
 auto r1 = 4 * (_*2) * (_+2); // (4 * 2 + 2) = 10
@@ -274,7 +253,8 @@ std::cout << r0, << "," << r1 << std::endl;
 ### Point-free style for Haskell maniacs
 
 ```cpp
-using namespace kari::underscore;
+using namespace kari_hpp::ext;
+using namespace kari_hpp::ext::underscore;
 
 // (. (+2)) (*2) $ 10 == 24 // haskell analog
 auto r0 = (_*(_+2))(_*2) * 10;
