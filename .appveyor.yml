@@ -7,7 +7,6 @@ platform:
   - x64
 
 configuration:
-  - Debug
   - Release
 
 for:
@@ -16,25 +15,9 @@ for:
   matrix:
     only:
       - platform: x86
-        configuration: Debug
-  build_script:
-    - scripts\build_debug_x86.bat
-
--
-  matrix:
-    only:
-      - platform: x64
-        configuration: Debug
-  build_script:
-    - scripts\build_debug_x64.bat
-
--
-  matrix:
-    only:
-      - platform: x86
         configuration: Release
   build_script:
-    - scripts\build_release_x86.bat
+    - .ci\build_windows_x86.bat
 
 -
   matrix:
@@ -42,4 +25,4 @@ for:
       - platform: x64
         configuration: Release
   build_script:
-    - scripts\build_release_x64.bat
+    - .ci\build_windows_x64.bat
