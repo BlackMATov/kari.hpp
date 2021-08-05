@@ -471,7 +471,7 @@ TEST_CASE("kari") {
             : v_(v) {}
 
             box(box&&) = default;
-            box& operator=(box&&) = default;
+            box& operator=(box&&) = delete;
 
             box(const box&) = delete;
             box& operator=(const box&) = delete;

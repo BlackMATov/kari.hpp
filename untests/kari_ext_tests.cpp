@@ -13,7 +13,7 @@ using namespace kari_hpp::ext;
 TEST_CASE("kari_ext") {
     struct box final {
         int v;
-        constexpr box(int v): v(v) {}
+        constexpr box(int nv): v(nv) {}
     };
 
     SUBCASE("fid") {

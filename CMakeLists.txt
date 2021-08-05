@@ -11,6 +11,15 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE headers)
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
+target_compile_options(${PROJECT_NAME}
+    INTERFACE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:
+        -Wno-c++98-compat-pedantic
+        -Wno-ctad-maybe-unsupported
+        -Wno-padded
+        -Wno-poison-system-directories
+        -Wno-unknown-warning-option>)
+
 if(BUILD_AS_STANDALONE)
     option(BUILD_WITH_UNTESTS "Build with unit tests" ON)
     if(BUILD_WITH_UNTESTS)
