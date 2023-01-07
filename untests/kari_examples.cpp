@@ -1,11 +1,10 @@
 /*******************************************************************************
  * This file is part of the "https://github.com/BlackMATov/kari.hpp"
  * For conditions of distribution and use, see copyright notice in LICENSE.md
- * Copyright (C) 2017-2021, by Matvey Cherevko (blackmatov@gmail.com)
+ * Copyright (C) 2017-2023, by Matvey Cherevko (blackmatov@gmail.com)
  ******************************************************************************/
 
-#include <kari.hpp/kari.hpp>
-#include "doctest/doctest.hpp"
+#include "kari_tests.hpp"
 
 #include <algorithm>
 #include <numeric>
@@ -90,8 +89,8 @@ TEST_CASE("kari_examples") {
 
         constexpr curry_t c = l;
 
-        STATIC_REQUIRE(is_curried_v<decltype(c)>);
-        STATIC_REQUIRE(is_curried<decltype(c)>::value);
+        STATIC_CHECK(is_curried_v<decltype(c)>);
+        STATIC_CHECK(is_curried<decltype(c)>::value);
     }
 
     SUBCASE("Section of operators") {
@@ -114,8 +113,8 @@ TEST_CASE("kari_examples") {
         constexpr auto r0 = (_*2) | (_+2) | 4; // (4 * 2) + 2 = 10
         constexpr auto r1 = 4 | (_*2) | (_+2); // (4 * 2 + 2) = 10
 
-        STATIC_REQUIRE(r0 == 10);
-        STATIC_REQUIRE(r1 == 10);
+        STATIC_CHECK(r0 == 10);
+        STATIC_CHECK(r1 == 10);
     }
 
     SUBCASE("Compose operator") {
@@ -125,8 +124,8 @@ TEST_CASE("kari_examples") {
         constexpr auto r0 = (_*2) * (_+2) * 4; // (4 + 2) * 2 = 12
         constexpr auto r1 = 4 * (_*2) * (_+2); // (4 * 2 + 2) = 10
 
-        STATIC_REQUIRE(r0 == 12);
-        STATIC_REQUIRE(r1 == 10);
+        STATIC_CHECK(r0 == 12);
+        STATIC_CHECK(r1 == 10);
     }
 
     SUBCASE("Point-free style") {
@@ -139,7 +138,7 @@ TEST_CASE("kari_examples") {
         // ((+2) .) (*2) $ 10 == 22 // haskell analog
         constexpr auto r1 = ((_+2)*_)(_*2) * 10;
 
-        STATIC_REQUIRE(r0 == 24);
-        STATIC_REQUIRE(r1 == 22);
+        STATIC_CHECK(r0 == 24);
+        STATIC_CHECK(r1 == 22);
     }
 }

@@ -1,11 +1,10 @@
 /*******************************************************************************
  * This file is part of the "https://github.com/BlackMATov/kari.hpp"
  * For conditions of distribution and use, see copyright notice in LICENSE.md
- * Copyright (C) 2017-2021, by Matvey Cherevko (blackmatov@gmail.com)
+ * Copyright (C) 2017-2023, by Matvey Cherevko (blackmatov@gmail.com)
  ******************************************************************************/
 
-#include <kari.hpp/kari.hpp>
-#include "doctest/doctest.hpp"
+#include "kari_tests.hpp"
 
 #include <functional>
 
@@ -20,7 +19,7 @@ TEST_CASE("kari") {
 
             constexpr curry_t f = l;
 
-            STATIC_REQUIRE(f() == 1);
+            STATIC_CHECK(f() == 1);
         }
         {
             constexpr auto l = [](auto a){
@@ -29,8 +28,8 @@ TEST_CASE("kari") {
 
             constexpr curry_t f = l;
 
-            STATIC_REQUIRE(f(1) == 1);
-            STATIC_REQUIRE(f()(1) == 1);
+            STATIC_CHECK(f(1) == 1);
+            STATIC_CHECK(f()(1) == 1);
         }
         {
             constexpr auto l = [](auto a, auto b){
@@ -39,13 +38,13 @@ TEST_CASE("kari") {
 
             constexpr curry_t f = l;
 
-            STATIC_REQUIRE(f(1,2) == 3);
-            STATIC_REQUIRE(f()(1,2) == 3);
+            STATIC_CHECK(f(1,2) == 3);
+            STATIC_CHECK(f()(1,2) == 3);
 
-            STATIC_REQUIRE(f(1)(2) == 3);
-            STATIC_REQUIRE(f()(1)(2) == 3);
-            STATIC_REQUIRE(f(1)()(2) == 3);
-            STATIC_REQUIRE(f()(1)()(2) == 3);
+            STATIC_CHECK(f(1)(2) == 3);
+            STATIC_CHECK(f()(1)(2) == 3);
+            STATIC_CHECK(f(1)()(2) == 3);
+            STATIC_CHECK(f()(1)()(2) == 3);
         }
         {
             constexpr auto l = [](auto a, auto b, auto c){
@@ -54,26 +53,26 @@ TEST_CASE("kari") {
 
             constexpr curry_t f = l;
 
-            STATIC_REQUIRE(f(1,2,3) == 6);
-            STATIC_REQUIRE(f()(1,2,3) == 6);
+            STATIC_CHECK(f(1,2,3) == 6);
+            STATIC_CHECK(f()(1,2,3) == 6);
 
-            STATIC_REQUIRE(f(1)(2,3) == 6);
-            STATIC_REQUIRE(f()(1)(2,3) == 6);
-            STATIC_REQUIRE(f(1)()(2,3) == 6);
-            STATIC_REQUIRE(f()(1)()(2,3) == 6);
+            STATIC_CHECK(f(1)(2,3) == 6);
+            STATIC_CHECK(f()(1)(2,3) == 6);
+            STATIC_CHECK(f(1)()(2,3) == 6);
+            STATIC_CHECK(f()(1)()(2,3) == 6);
 
-            STATIC_REQUIRE(f(1,2)(3) == 6);
-            STATIC_REQUIRE(f()(1,2)(3) == 6);
-            STATIC_REQUIRE(f(1,2)()(3) == 6);
-            STATIC_REQUIRE(f()(1,2)()(3) == 6);
+            STATIC_CHECK(f(1,2)(3) == 6);
+            STATIC_CHECK(f()(1,2)(3) == 6);
+            STATIC_CHECK(f(1,2)()(3) == 6);
+            STATIC_CHECK(f()(1,2)()(3) == 6);
 
-            STATIC_REQUIRE(f(1)(2)(3) == 6);
-            STATIC_REQUIRE(f()(1)(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
+            STATIC_CHECK(f(1)(2)(3) == 6);
+            STATIC_CHECK(f()(1)(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)()(3) == 6);
         }
     }
 
@@ -87,26 +86,26 @@ TEST_CASE("kari") {
 
             constexpr curry_t f = l;
 
-            STATIC_REQUIRE(f(1,2,3) == 6);
-            STATIC_REQUIRE(f()(1,2,3) == 6);
+            STATIC_CHECK(f(1,2,3) == 6);
+            STATIC_CHECK(f()(1,2,3) == 6);
 
-            STATIC_REQUIRE(f(1)(2,3) == 6);
-            STATIC_REQUIRE(f()(1)(2,3) == 6);
-            STATIC_REQUIRE(f(1)()(2,3) == 6);
-            STATIC_REQUIRE(f()(1)()(2,3) == 6);
+            STATIC_CHECK(f(1)(2,3) == 6);
+            STATIC_CHECK(f()(1)(2,3) == 6);
+            STATIC_CHECK(f(1)()(2,3) == 6);
+            STATIC_CHECK(f()(1)()(2,3) == 6);
 
-            STATIC_REQUIRE(f(1,2)(3) == 6);
-            STATIC_REQUIRE(f()(1,2)(3) == 6);
-            STATIC_REQUIRE(f(1,2)()(3) == 6);
-            STATIC_REQUIRE(f()(1,2)()(3) == 6);
+            STATIC_CHECK(f(1,2)(3) == 6);
+            STATIC_CHECK(f()(1,2)(3) == 6);
+            STATIC_CHECK(f(1,2)()(3) == 6);
+            STATIC_CHECK(f()(1,2)()(3) == 6);
 
-            STATIC_REQUIRE(f(1)(2)(3) == 6);
-            STATIC_REQUIRE(f()(1)(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
+            STATIC_CHECK(f(1)(2)(3) == 6);
+            STATIC_CHECK(f()(1)(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)()(3) == 6);
         }
         {
             constexpr auto l = [](auto a, auto b){
@@ -117,26 +116,26 @@ TEST_CASE("kari") {
 
             constexpr curry_t f = l;
 
-            STATIC_REQUIRE(f(1,2,3) == 6);
-            STATIC_REQUIRE(f()(1,2,3) == 6);
+            STATIC_CHECK(f(1,2,3) == 6);
+            STATIC_CHECK(f()(1,2,3) == 6);
 
-            STATIC_REQUIRE(f(1)(2,3) == 6);
-            STATIC_REQUIRE(f()(1)(2,3) == 6);
-            STATIC_REQUIRE(f(1)()(2,3) == 6);
-            STATIC_REQUIRE(f()(1)()(2,3) == 6);
+            STATIC_CHECK(f(1)(2,3) == 6);
+            STATIC_CHECK(f()(1)(2,3) == 6);
+            STATIC_CHECK(f(1)()(2,3) == 6);
+            STATIC_CHECK(f()(1)()(2,3) == 6);
 
-            STATIC_REQUIRE(f(1,2)(3) == 6);
-            STATIC_REQUIRE(f()(1,2)(3) == 6);
-            STATIC_REQUIRE(f(1,2)()(3) == 6);
-            STATIC_REQUIRE(f()(1,2)()(3) == 6);
+            STATIC_CHECK(f(1,2)(3) == 6);
+            STATIC_CHECK(f()(1,2)(3) == 6);
+            STATIC_CHECK(f(1,2)()(3) == 6);
+            STATIC_CHECK(f()(1,2)()(3) == 6);
 
-            STATIC_REQUIRE(f(1)(2)(3) == 6);
-            STATIC_REQUIRE(f()(1)(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
+            STATIC_CHECK(f(1)(2)(3) == 6);
+            STATIC_CHECK(f()(1)(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)()(3) == 6);
         }
     }
 
@@ -146,7 +145,7 @@ TEST_CASE("kari") {
                 return 1;
             });
 
-            STATIC_REQUIRE(f == 1);
+            STATIC_CHECK(f == 1);
         }
         {
             {
@@ -154,15 +153,15 @@ TEST_CASE("kari") {
                     return a;
                 });
 
-                STATIC_REQUIRE(f(1) == 1);
-                STATIC_REQUIRE(f()(1) == 1);
+                STATIC_CHECK(f(1) == 1);
+                STATIC_CHECK(f()(1) == 1);
             }
             {
                 constexpr auto f = curry([](auto a){
                     return a;
                 }, 1);
 
-                STATIC_REQUIRE(f == 1);
+                STATIC_CHECK(f == 1);
             }
         }
         {
@@ -171,28 +170,28 @@ TEST_CASE("kari") {
                     return a + b;
                 });
 
-                STATIC_REQUIRE(f(1,2) == 3);
-                STATIC_REQUIRE(f()(1,2) == 3);
+                STATIC_CHECK(f(1,2) == 3);
+                STATIC_CHECK(f()(1,2) == 3);
 
-                STATIC_REQUIRE(f(1)(2) == 3);
-                STATIC_REQUIRE(f()(1)(2) == 3);
-                STATIC_REQUIRE(f(1)()(2) == 3);
-                STATIC_REQUIRE(f()(1)()(2) == 3);
+                STATIC_CHECK(f(1)(2) == 3);
+                STATIC_CHECK(f()(1)(2) == 3);
+                STATIC_CHECK(f(1)()(2) == 3);
+                STATIC_CHECK(f()(1)()(2) == 3);
             }
             {
                 constexpr auto f = curry([](auto a, auto b){
                     return a + b;
                 }, 1);
 
-                STATIC_REQUIRE(f(2) == 3);
-                STATIC_REQUIRE(f()(2) == 3);
+                STATIC_CHECK(f(2) == 3);
+                STATIC_CHECK(f()(2) == 3);
             }
             {
                 constexpr auto f = curry([](auto a, auto b){
                     return a + b;
                 }, 1, 2);
 
-                STATIC_REQUIRE(f == 3);
+                STATIC_CHECK(f == 3);
             }
         }
         {
@@ -201,54 +200,54 @@ TEST_CASE("kari") {
                     return a + b + c;
                 });
 
-                STATIC_REQUIRE(f(1,2,3) == 6);
-                STATIC_REQUIRE(f()(1,2,3) == 6);
+                STATIC_CHECK(f(1,2,3) == 6);
+                STATIC_CHECK(f()(1,2,3) == 6);
 
-                STATIC_REQUIRE(f(1)(2,3) == 6);
-                STATIC_REQUIRE(f()(1)(2,3) == 6);
-                STATIC_REQUIRE(f(1)()(2,3) == 6);
-                STATIC_REQUIRE(f()(1)()(2,3) == 6);
+                STATIC_CHECK(f(1)(2,3) == 6);
+                STATIC_CHECK(f()(1)(2,3) == 6);
+                STATIC_CHECK(f(1)()(2,3) == 6);
+                STATIC_CHECK(f()(1)()(2,3) == 6);
 
-                STATIC_REQUIRE(f(1,2)(3) == 6);
-                STATIC_REQUIRE(f()(1,2)(3) == 6);
-                STATIC_REQUIRE(f(1,2)()(3) == 6);
-                STATIC_REQUIRE(f()(1,2)()(3) == 6);
+                STATIC_CHECK(f(1,2)(3) == 6);
+                STATIC_CHECK(f()(1,2)(3) == 6);
+                STATIC_CHECK(f(1,2)()(3) == 6);
+                STATIC_CHECK(f()(1,2)()(3) == 6);
 
-                STATIC_REQUIRE(f(1)(2)(3) == 6);
-                STATIC_REQUIRE(f()(1)(2)(3) == 6);
-                STATIC_REQUIRE(f(1)()(2)(3) == 6);
-                STATIC_REQUIRE(f(1)(2)()(3) == 6);
-                STATIC_REQUIRE(f()(1)()(2)(3) == 6);
-                STATIC_REQUIRE(f(1)()(2)()(3) == 6);
-                STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
+                STATIC_CHECK(f(1)(2)(3) == 6);
+                STATIC_CHECK(f()(1)(2)(3) == 6);
+                STATIC_CHECK(f(1)()(2)(3) == 6);
+                STATIC_CHECK(f(1)(2)()(3) == 6);
+                STATIC_CHECK(f()(1)()(2)(3) == 6);
+                STATIC_CHECK(f(1)()(2)()(3) == 6);
+                STATIC_CHECK(f()(1)()(2)()(3) == 6);
             }
             {
                 constexpr auto f = curry([](auto a, auto b, auto c){
                     return a + b + c;
                 }, 1);
 
-                STATIC_REQUIRE(f(2,3) == 6);
-                STATIC_REQUIRE(f()(2,3) == 6);
+                STATIC_CHECK(f(2,3) == 6);
+                STATIC_CHECK(f()(2,3) == 6);
 
-                STATIC_REQUIRE(f(2)(3) == 6);
-                STATIC_REQUIRE(f()(2)(3) == 6);
-                STATIC_REQUIRE(f(2)()(3) == 6);
-                STATIC_REQUIRE(f()(2)()(3) == 6);
+                STATIC_CHECK(f(2)(3) == 6);
+                STATIC_CHECK(f()(2)(3) == 6);
+                STATIC_CHECK(f(2)()(3) == 6);
+                STATIC_CHECK(f()(2)()(3) == 6);
             }
             {
                 constexpr auto f = curry([](auto a, auto b, auto c){
                     return a + b + c;
                 }, 1, 2);
 
-                STATIC_REQUIRE(f(3) == 6);
-                STATIC_REQUIRE(f()(3) == 6);
+                STATIC_CHECK(f(3) == 6);
+                STATIC_CHECK(f()(3) == 6);
             }
             {
                 constexpr auto f = curry([](auto a, auto b, auto c){
                     return a + b + c;
                 }, 1, 2, 3);
 
-                STATIC_REQUIRE(f == 6);
+                STATIC_CHECK(f == 6);
             }
         }
     }
@@ -261,26 +260,26 @@ TEST_CASE("kari") {
                 });
             });
 
-            STATIC_REQUIRE(f(1,2,3) == 6);
-            STATIC_REQUIRE(f()(1,2,3) == 6);
+            STATIC_CHECK(f(1,2,3) == 6);
+            STATIC_CHECK(f()(1,2,3) == 6);
 
-            STATIC_REQUIRE(f(1)(2,3) == 6);
-            STATIC_REQUIRE(f()(1)(2,3) == 6);
-            STATIC_REQUIRE(f(1)()(2,3) == 6);
-            STATIC_REQUIRE(f()(1)()(2,3) == 6);
+            STATIC_CHECK(f(1)(2,3) == 6);
+            STATIC_CHECK(f()(1)(2,3) == 6);
+            STATIC_CHECK(f(1)()(2,3) == 6);
+            STATIC_CHECK(f()(1)()(2,3) == 6);
 
-            STATIC_REQUIRE(f(1,2)(3) == 6);
-            STATIC_REQUIRE(f()(1,2)(3) == 6);
-            STATIC_REQUIRE(f(1,2)()(3) == 6);
-            STATIC_REQUIRE(f()(1,2)()(3) == 6);
+            STATIC_CHECK(f(1,2)(3) == 6);
+            STATIC_CHECK(f()(1,2)(3) == 6);
+            STATIC_CHECK(f(1,2)()(3) == 6);
+            STATIC_CHECK(f()(1,2)()(3) == 6);
 
-            STATIC_REQUIRE(f(1)(2)(3) == 6);
-            STATIC_REQUIRE(f()(1)(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
+            STATIC_CHECK(f(1)(2)(3) == 6);
+            STATIC_CHECK(f()(1)(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)()(3) == 6);
         }
         {
             constexpr auto f = curry([](auto a, auto b){
@@ -289,26 +288,26 @@ TEST_CASE("kari") {
                 });
             });
 
-            STATIC_REQUIRE(f(1,2,3) == 6);
-            STATIC_REQUIRE(f()(1,2,3) == 6);
+            STATIC_CHECK(f(1,2,3) == 6);
+            STATIC_CHECK(f()(1,2,3) == 6);
 
-            STATIC_REQUIRE(f(1)(2,3) == 6);
-            STATIC_REQUIRE(f()(1)(2,3) == 6);
-            STATIC_REQUIRE(f(1)()(2,3) == 6);
-            STATIC_REQUIRE(f()(1)()(2,3) == 6);
+            STATIC_CHECK(f(1)(2,3) == 6);
+            STATIC_CHECK(f()(1)(2,3) == 6);
+            STATIC_CHECK(f(1)()(2,3) == 6);
+            STATIC_CHECK(f()(1)()(2,3) == 6);
 
-            STATIC_REQUIRE(f(1,2)(3) == 6);
-            STATIC_REQUIRE(f()(1,2)(3) == 6);
-            STATIC_REQUIRE(f(1,2)()(3) == 6);
-            STATIC_REQUIRE(f()(1,2)()(3) == 6);
+            STATIC_CHECK(f(1,2)(3) == 6);
+            STATIC_CHECK(f()(1,2)(3) == 6);
+            STATIC_CHECK(f(1,2)()(3) == 6);
+            STATIC_CHECK(f()(1,2)()(3) == 6);
 
-            STATIC_REQUIRE(f(1)(2)(3) == 6);
-            STATIC_REQUIRE(f()(1)(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)(3) == 6);
-            STATIC_REQUIRE(f(1)()(2)()(3) == 6);
-            STATIC_REQUIRE(f()(1)()(2)()(3) == 6);
+            STATIC_CHECK(f(1)(2)(3) == 6);
+            STATIC_CHECK(f()(1)(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)(3) == 6);
+            STATIC_CHECK(f(1)()(2)()(3) == 6);
+            STATIC_CHECK(f()(1)()(2)()(3) == 6);
         }
     }
 
@@ -332,8 +331,8 @@ TEST_CASE("kari") {
             constexpr auto get_v = curry_t(&box::get_v);
             constexpr auto add_v = curry_t(&box::add_v);
 
-            STATIC_REQUIRE(get_v(box(1)) == 1);
-            STATIC_REQUIRE(add_v(box(1), 2) == 3);
+            STATIC_CHECK(get_v(box(1)) == 1);
+            STATIC_CHECK(add_v(box(1), 2) == 3);
         }
         {
             constexpr auto get_v = curry_t(&box::get_v);
@@ -371,8 +370,8 @@ TEST_CASE("kari") {
             constexpr auto get_v = curry(&box::get_v);
             constexpr auto add_v = curry(&box::add_v);
 
-            STATIC_REQUIRE(get_v(box(1)) == 1);
-            STATIC_REQUIRE(add_v(box(1), 2) == 3);
+            STATIC_CHECK(get_v(box(1)) == 1);
+            STATIC_CHECK(add_v(box(1), 2) == 3);
 
             {
                 box b{1};
@@ -415,7 +414,7 @@ TEST_CASE("kari") {
         };
         {
             constexpr auto f = curry_t(&box::v_);
-            STATIC_REQUIRE(f(box(1)) == 1);
+            STATIC_CHECK(f(box(1)) == 1);
         }
         {
             constexpr auto f = curry_t(&box::v_);
@@ -434,11 +433,11 @@ TEST_CASE("kari") {
         };
         {
             constexpr auto f = curry(&box::v_);
-            STATIC_REQUIRE(f(box(1)) == 1);
+            STATIC_CHECK(f(box(1)) == 1);
         }
         {
             constexpr auto f = curry(&box::v_, box(1));
-            STATIC_REQUIRE(f == 1);
+            STATIC_CHECK(f == 1);
         }
         {
             const box b{1};
@@ -481,6 +480,6 @@ TEST_CASE("kari") {
             return box(v1.v_ + v2.v_ + v3.v_);
         })(box(1),box(2))(box(3));
 
-        STATIC_REQUIRE(b.v_ == 6);
+        STATIC_CHECK(b.v_ == 6);
     }
 }

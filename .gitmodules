@@ -1,0 +1,3 @@
+[submodule "vendors/doctest"]
+	path = vendors/doctest
+	url = https://github.com/doctest/doctest/
