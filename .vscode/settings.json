@@ -1,29 +1,13 @@
 {
-    "[cpp]": {
-        "files.encoding": "utf8",
-        "files.insertFinalNewline": true,
-        "files.trimFinalNewlines": true,
-        "files.trimTrailingWhitespace": true
-    },
-    "[cmake]": {
-        "files.encoding": "utf8",
-        "files.insertFinalNewline": true,
-        "files.trimFinalNewlines": true,
-        "files.trimTrailingWhitespace": true
-    },
-    "[python]": {
+    "[c][cmake][cpp][json][jsonc][markdown][python][yaml]": {
         "files.encoding": "utf8",
         "files.insertFinalNewline": true,
         "files.trimFinalNewlines": true,
         "files.trimTrailingWhitespace": true
     },
     "clangd.arguments": [
-        "--all-scopes-completion",
-        "--background-index",
-        "--clang-tidy",
-        "--compile-commands-dir=${workspaceFolder}/.clangd",
-        "--completion-style=detailed",
-        "--header-insertion=never"
+        "--header-insertion=never",
+        "--compile-commands-dir=${workspaceFolder}/.clangd"
     ],
     "cmake.copyCompileCommands": "${workspaceFolder}/.clangd/compile_commands.json"
 }
