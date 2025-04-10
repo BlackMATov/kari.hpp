@@ -1,7 +1,7 @@
 /*******************************************************************************
  * This file is part of the "https://github.com/BlackMATov/kari.hpp"
  * For conditions of distribution and use, see copyright notice in LICENSE.md
- * Copyright (C) 2017-2023, by Matvey Cherevko (blackmatov@gmail.com)
+ * Copyright (C) 2017-2025, by Matvey Cherevko (blackmatov@gmail.com)
  ******************************************************************************/
 
 #include <kari.hpp/kari.hpp>
