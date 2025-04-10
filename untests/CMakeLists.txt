@@ -14,11 +14,13 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         /WX /W4 /bigobj>
     $<$<CXX_COMPILER_ID:GNU>:
         -Werror -Wall -Wextra -Wpedantic
+        -Wno-dangling-reference
         -Wno-inaccessible-base>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:
         -Werror -Weverything -Wconversion
         -Wno-c++98-compat
         -Wno-c++98-compat-pedantic
+        -Wno-ctad-maybe-unsupported
         -Wno-exit-time-destructors
         -Wno-global-constructors
         -Wno-padded
@@ -30,7 +32,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wno-unused-macros
         -Wno-unused-member-function
         -Wno-weak-vtables
-        -Wno-zero-as-null-pointer-constant
-        >)
+        -Wno-zero-as-null-pointer-constant>)
 
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
